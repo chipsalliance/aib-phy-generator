@@ -1,0 +1,154 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2019 Blue Cheetah Analog Design Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+dsn_class: aib_ams.design.phase_interp.PhaseInterpDesigner
+root_dir: gen_outputs/phase_interp
+impl_lib: AAA_DSN_PHASE_INTERP
+precision: 8
+dsn_params:
+  target:
+    td_min: 1.0e-12
+    td_max: 15.0e-12
+    td_sigma: 0.25e-12
+    t_max: 150.0e-12
+
+  tristate_seg: 2
+  nbits: 7
+  seg_buf_min_override: 2
+  seg_buf_max_override: 50
+  design_using_signoff: True
+
+  rtol: 1.0e-3
+  atol: 1.0e-3
+  tbit: 1.0e-9
+  trf: 20.0e-12
+  cload: 5.0e-15
+  plot_result: True
+  dsn_monte_carlo: False
+  gen_cell_specs:
+    impl_lib: AAA_phaseinterp
+    impl_cell: AA_PhaseInterpWithDelay
+    root_dir: gen_outputs/PhaseInterpWithDelay
+    model_params:
+      XDC:
+        XNAND_SR0: {view_name: '', delay: 20}
+        XNAND_SR1: {view_name: '', delay: 20}
+        XNAND_in: {view_name: '', delay: 20}
+        XNAND_out: {view_name: '', delay: 20}
+      XINT:
+        view_name: ''
+        intrinsic: 100
+        steps: [0, 0.143, 0.286, 0.429, 0.571, 0.714, 0.857, 1]
+      XINVH: {view_name: ''}
+      XINVL: {view_name: ''}
+      XNANDH: {view_name: ''}
+      XNANDL: {view_name: ''}
+  gen_cell_args:
+    gen_lay: True
+    gen_sch: True
+    gen_model: True
+    run_lvs: True
+    gen_lef: True
+
+  # Monte Carlo setup
+  mc_params:
+    numruns: 30
+    seed: 1
+    donominal: 'yes'
+    variations: 'all'
+  mc_corner: 'mc_25'
+
+  num_cores: 1
+  delay_cell_params:
+    seg_dict:
+      in: 2
+      out: 2
+      sr: 1
+    tile0: 1
+    tile1: 3
+    substrate_row: True
+
+  pinfo:
+    tiles:
+      - name: ptap_tile
+      - name: logic_tile
+      - name: ntap_tile
+      - name: logic_tile
+        flip: True
+      - name: ptap_tile
+      - name: logic_tile
+      - name: ntap_tile
+      - name: logic_tile
+        flip: True
+      - name: ptap_tile
+    tile_specs:
+      arr_info:
+        lch: 36
+        top_layer: 3
+        tr_widths:
+          sup: {2: 2, 3: 2, 4: 2}
+          sig: {2: 1, 3: 1, 4: 1}
+        tr_spaces:
+          !!python/tuple ['sup', '']: {3: 0, 4: 1}
+        ridx_n: 0
+        ridx_p: -1
+
+      place_info:
+        ptap_tile:
+          priority: 2
+          bot_mirror: False
+          top_mirror: False
+          row_specs:
+            - mos_type: ptap
+              width: 2
+              threshold: standard
+              bot_wires: []
+              top_wires:
+                data: [sup]
+                align: CENTER_COMPACT
+        logic_tile:
+          priority: 1
+          bot_mirror: False
+          top_mirror: False
+          row_specs:
+            - mos_type: nch
+              width: 4
+              threshold: standard
+              bot_wires: ['sig<0:1>']
+              top_wires: ['sig<0:1>']
+              flip: True
+            - mos_type: pch
+              width: 4
+              threshold: standard
+              bot_wires: ['sig<0:1>']
+              top_wires: ['sig<0:1>']
+        ntap_tile:
+          priority: 2
+          bot_mirror: False
+          top_mirror: False
+          row_specs:
+            - mos_type: ntap
+              width: 2
+              threshold: standard
+              bot_wires: []
+              top_wires:
+                data: [sup]
+                align: CENTER_COMPACT
+
+      abut_list:
+        - [[ptap_tile, 1], [logic_tile, 0]]
+        - [[logic_tile, 1], [ntap_tile, 0]]
+        - [[ntap_tile, 1], [logic_tile, 1]]
+        - [[logic_tile, 0], [ptap_tile, 0]]

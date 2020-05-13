@@ -1,0 +1,77 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2019 Blue Cheetah Analog Design Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+corners: ['tt', 'ff', 'ss']  # The corners supported by this process
+vdd: 0.8  # The nominal VDD of this process
+lch_min: 36  # The minimum channel length
+w_minn: 4  # Minimum width for devices in the process
+w_minp: 4  # Minimum width for devices in the process
+w_maxn: 8  # max width for devices in the process
+w_maxp: 8  # max width for devices in the process
+w_nomn: 8  # nom width for devices in the process
+w_nomp: 8  # nom width for devices in the process
+inv_beta: 1 # Ratio of PMOS segments to NMOS segments for balance rise/fall delay
+max_fanout: 10 # Nominal maximum allowed capacitive fanout
+min_fanout: 0.75 # Nominal minimum allowed capacitive fanout
+seg_min: 1
+thresholds: ['lvt', 'standard']  # Thresholds
+num_monte_carlo_runs: 100
+trf_nom: 30.0e-12
+
+dsn_envs:
+  slow:
+     env: ['ss_25']
+     vdd: 0.9
+     vddio: 0.9
+  center:
+    env: ['tt_25']
+    vdd: 1.0
+    vddio: 0.9
+  fast:
+    env: ['ff_25']
+    vdd: 1.1
+    vddio: 0.9
+  skew_p:
+    env: ['sf_25']
+    vdd: 1.0
+    vddio: 0.9
+  skew_n:
+    env: ['fs_25']
+    vdd: 1.0
+    vddio: 0.9
+
+signoff_envs:
+  lvl_func:
+    env: ['sf_25']
+    vddo: 1.1
+    vddi: 0.9
+  vmax:
+    vdd: 1.1
+    vddio: 1.1
+  all_corners:
+    envs: ['sf_25', 'fs_25', 'ss_25', 'ff_25', 'tt_25']
+    vddio:
+       sf_25: 1.0
+       fs_25: 1.0
+       ss_25: 0.9
+       ff_25: 1.1
+       tt_25: 1.0
+    vdd:
+      sf_25: 1.0
+      fs_25: 1.0
+      ss_25: 0.9
+      ff_25: 1.1
+      tt_25: 1.0

@@ -1,0 +1,111 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2019 Blue Cheetah Analog Design Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+dsn_class: aib_ams.design.delay_line.DelayLineDesigner
+impl_lib: AAA_DSN_DELAY_LINE
+root_dir: gen_outputs/dsn_dlyline
+precision: 8
+dsn_params:
+  pinfo:
+    tiles:
+      - name: ptap_tile
+      - name: logic_tile
+      - name: ntap_tile
+      - name: logic_tile
+        flip: True
+    tile_specs:
+      arr_info:
+        lch: 36
+        top_layer: 3
+        tr_widths:
+          sup: {2: 2, 3: 2, 4: 2}
+          sig: {2: 1, 3: 1, 4: 1}
+        tr_spaces:
+          !!python/tuple ['sup', '']: {3: 0, 4: 0}
+        ridx_n: 0
+        ridx_p: -1
+
+      place_info:
+        ptap_tile:
+          priority: 2
+          bot_mirror: False
+          top_mirror: False
+          row_specs:
+            - mos_type: ptap
+              width: 2
+              threshold: lvt
+              bot_wires: []
+              top_wires:
+                data: [sup]
+        logic_tile:
+          priority: 1
+          bot_mirror: False
+          top_mirror: False
+          row_specs:
+            - mos_type: nch
+              width: 4
+              threshold: lvt
+              bot_wires: ['sig<0:1>']
+              top_wires: ['sig<0:1>']
+              flip: True
+            - mos_type: pch
+              width: 4
+              threshold: lvt
+              bot_wires: ['sig<0:1>']
+              top_wires: ['sig<0:1>']
+        ntap_tile:
+          priority: 2
+          bot_mirror: False
+          top_mirror: False
+          row_specs:
+            - mos_type: ntap
+              width: 2
+              threshold: lvt
+              bot_wires: []
+              top_wires:
+                data: [sup]
+
+      abut_list:
+        - [[ptap_tile, 1], [logic_tile, 0]]
+        - [[logic_tile, 1], [ntap_tile, 0]]
+        - [[ntap_tile, 1], [logic_tile, 1]]
+        - [[logic_tile, 0], [ptap_tile, 0]]
+
+  max_nand_seg: 10
+  max_stack: 2
+  tmin: 40e-12
+  tmax: 60e-12
+  cload: 10.0e-15
+  ncodes: 64
+  std_delay: 1.0e-12
+  nrows: 6
+  ncols: 11
+
+  sim_params:
+    sim_envs: ['tt_25']
+    tper: 40.0e-9
+    ncycles: 3
+    trf: 20.0e-12
+    tclk: 20.0e-9
+    clk_trf: 20.0e-12
+    thres_lo: 0.1
+    thres_hi: 0.9
+
+  mc_dsn_env: ''
+  mc_params:
+    numruns: 30
+    seed: 1
+    donominal: 'yes'
+    variations: 'all'
