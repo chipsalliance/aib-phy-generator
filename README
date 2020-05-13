@@ -20,10 +20,9 @@ info@bcanalog.com
 
 1. Clone the AIB Generator repository using a git command.  The following 
 commands use an example target directory of ~/aib.
-cd ~/aib  
-mkdir aib-phy-generator  
-cd aib-phy-generator  
-git clone https://github.com/chipsalliance/aib-phy-generator  
+cd ~/aib 
+# Do a git init if you haven't already 
+git clone https://github.com/chipsalliance/aib-phy-generator aib-phy-generator  
 
 If your Linux machines cannot access the internet, you can use a Windows 
 computer that is connected to the internet.  Download "git for windows" 
