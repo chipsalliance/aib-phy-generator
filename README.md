@@ -1,4 +1,4 @@
-AIB PHY Generator
+# AIB PHY Generator
 
 Developed by Blue Cheetah Analog Design, Inc.
 info@bcanalog.com
@@ -20,10 +20,11 @@ info@bcanalog.com
 
 1. Clone the AIB Generator repository using a git command.  The following 
 commands use an example target directory of ~/aib.
-$ cd ~/aib
-$ mkdir aib-phy-generator
-$ cd aib-phy-generator
-$ git clone https://github.com/chipsalliance/aib-phy-generator
+cd ~/aib
+mkdir aib-phy-generator
+cd aib-phy-generator
+git clone https://github.com/chipsalliance/aib-phy-generator
+
 If your Linux machines cannot access the internet, you can use a Windows 
 computer that is connected to the internet.  Download "git for windows" 
 (gitforwindows.org) and use the gitbash shell in that shell.  You will need 
@@ -37,10 +38,10 @@ the file into your target ~/aib directory.
     ADVGPDK (Version 0.5) - Advanced Node 0.8V / 1.8V Finfet / Multi Patterned 
     8 Metal Generic PDK: cds_ff_mpt_v_0.5 (1.2GB)
 List the file
-$ ls cds_ff_mpt_v_0.5.tar.gz
+ls cds_ff_mpt_v_0.5.tar.gz
 cds_ff_mpt_v_0.5.tar.gz
 
-# WIP # 3. Download the OpenAccess files. 
+// WIP // 3. Download the OpenAccess files. 
 To Be Documented: Process for compiling OpenAccess files for use by the
 AIB Generator.
  
@@ -51,22 +52,34 @@ tar xvf cds_ff_mpt_v_0.5.tar
 
 5. Download the remaining components from the Blue Cheetah repositories from 
 github.com into your target diretory.
-$ cd ~/aib/aib-phy-generator
-$ git clone https://github.com/bluecheetah/xbase.git xbase_bcad
-$ git clone https://github.com/bluecheetah/bag.git BAG_framework
-$ git clone https://github.com/bluecheetah/cds_ff_mpt.git cds_ff_mpt
+cd ~/aib/aib-phy-generator
+git clone https://github.com/bluecheetah/xbase.git xbase_bcad
+git clone https://github.com/bluecheetah/bag.git BAG_framework
+git clone https://github.com/bluecheetah/cds_ff_mpt.git cds_ff_mpt
 
 6. If you performed the "git clone" operations on a Windows system, you will 
 need to run these commands from Linux since Windows cannot create a symbolic 
 link.
-$ cd ~/aib/aib-phy-generator
-$ mkdir -p BAG_framework/pybag/_build/lib
-# WIP # cd BAG_framework/pybag/_build/lib
-# WIP # ln -s ../../../../bag3d0_rhel60_64/pybag .
-$ cd ~/aib/aib-phy-generator/cds_ff_mpt/workspace_setup
-$ rm PDK
-$ ln -s ~/aib/cds_ff_mpt_v_0.5 PDK
+cd ~/aib/aib-phy-generator
+mkdir -p BAG_framework/pybag/_build/lib
+// WIP // cd BAG_framework/pybag/_build/lib
+// WIP // ln -s ../../../../bag3d0_rhel60_64/pybag .
+cd ~/aib/aib-phy-generator/cds_ff_mpt/workspace_setup
+rm PDK
+ln -s ../../../cds_ff_mpt_v_0.5 PDK
 
+7. More symbolic links
+cd ~/aib/aib-phy-generator
+ln -s cds_ff_mpt/workspace_setup/bag_config.yaml bag_config.yaml
+ln -s cds_ff_mpt/workspace_setup/cds.lib.core cds.lib.core
+ln -s cds_ff_mpt/workspace_setup/display.drf display.drf
+ln -s cds_ff_mpt/workspace_setup/leBindKeys.il leBindKeys.il
+ln -s cds_ff_mpt/workspace_setup/models models
+ln -s cds_ff_mpt/workspace_setup/pvtech.lib pvtech.lib
+ln -s BAG_framework/run_scripts/start_bag_ICADV12d3.il start_bag.il
+ln -s BAG_framework/run_scripts/virt_server.sh virt_server.il
+ln -s cds_ff_mpt/workspace_setup/.cdsenv .cdsenv
+ln -s cds_ff_mpt/workspace_setup/.cdsinit .cdsinit
 
 # Running the AIB Generator
 
@@ -75,7 +88,24 @@ tool locations which are very likely to be different from user to user.
 
 1. On your target system perform the necessary commands to obtain licenses 
 to the Cadence tools.  Edit .bashrc to set your local paths to the tools.
-# WIP # Expand on this
+In our case we modified the following:
+#export CDS_INST_DIR=/tools/cadence/ICADVM181
+export CDS_INST_DIR=/p/psg/eda/cadence/virtuoso/ICADVM18.1.20191025.ISR7/linux64
+#export PEGASUS_HOME=/tools/cadence/PEGASUS184
+export PEGASUS_HOME=/nfs/site/disks/psg_eda_1/cadence/pvs/16.11.000/linux64
+#export SRR_HOME=/tools/cadence/SRR
+#export SPECTRE_HOME=/tools/cadence/SPECTRE181
+export SPECTRE_HOME=/nfs/site/disks/psg_eda_1/cadence/spectre/18.10.235/linux64
+
+#export CDSLIB_HOME=/tools/bag3/programs/cdsLibPlugin
+#export CDSLIB_TOOL=${CDSLIB_HOME}/tools.lnx86
+#export PATH=${CDSLIB_TOOL}/bin:${PATH:-}
+
+#export LD_LIBRARY_PATH=${CDSLIB_TOOL}/lib/64bit:${LD_LIBRARY_PATH}
+export LD_LIBRARY_PATH=${CDS_INST_DIR}/tools/lib/64bit:${LD_LIBRARY_PATH:-}
+#export LD_LIBRARY_PATH=${SRR_HOME}/lib/64bit:${LD_LIBRARY_PATH}
+#export LD_LIBRARY_PATH=${BAG_TOOLS_ROOT}/lib64:${LD_LIBRARY_PATH}
+#export CDS_LIC_FILE=5280@login1.bcanalog.com
 
 2. List the generators.
 $ ls data/aib_ams/specs_dsn
@@ -83,12 +113,14 @@ dcc_helper.yaml  output_driver.yaml  phase_interp.yaml      se_to_diff.yaml
 delay_line.yaml  output_pu_pd.yaml   rxanlg.yaml            txanlg.yaml
 frontend.yaml    phasedet.yaml       se_to_diff_match.yaml
 
-The top level generators are rxanlg, txanlg, frontend, and phase_interp.  The other generators are called by the top level generators.
+The top level generators are rxanlg, txanlg, frontend, and phase_interp.  The
+other generators are called by the top level generators.
 
 3. Source `.bashrc`/`.cshrc` in your terminal.
-$ source .bashrc
+source .bashrc
 
-4.  Run `start_bag.sh` to make sure that IPython interpreter starts successfully.
+4.  Run `start_bag.sh` to make sure that IPython interpreter starts 
+successfully.
 
 5.  Execute the following commands in python to make sure there are no errors:
 
