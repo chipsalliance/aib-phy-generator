@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2019 Blue Cheetah Analog Design Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+DEFINE BAG_prim $BAG_TECH_CONFIG_DIR/OA/BAG_prim
+DEFINE bag_test $BAG_WORK_DIR/BAG_framework/OA/bag_test
+DEFINE aib_ams $BAG_WORK_DIR/aib_ams/OA/aib_ams
+DEFINE bag3_analog $BAG_WORK_DIR/bag3_analog/OA/bag3_analog
+DEFINE bag3_digital $BAG_WORK_DIR/bag3_digital/OA/bag3_digital
+DEFINE bag3_testbenches $BAG_WORK_DIR/bag3_testbenches/OA/bag3_testbenches
+DEFINE xbase $BAG_WORK_DIR/xbase_bcad/OA/xbase
