@@ -1,0 +1,636 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2019 Blue Cheetah Analog Design Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+lib_name: bag3_testbenches
+cell_name: digital_tb_tran
+view_name: schematic
+bbox:
+  - -60
+  - -600
+  - 554
+  - 520
+terminals:
+  {}
+shapes:
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: in
+      points:
+        -
+          - -60
+          - 420
+        -
+          - -20
+          - 420
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: out
+      points:
+        -
+          - 140
+          - 420
+        -
+          - 180
+          - 420
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: VSS
+      points:
+        -
+          - 60
+          - 280
+        -
+          - 60
+          - 320
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: VDD
+      points:
+        -
+          - 60
+          - 480
+        -
+          - 60
+          - 520
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: gnd!
+      points:
+        -
+          - 360
+          - 20
+        -
+          - 360
+          - 60
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: VSS
+      points:
+        -
+          - 460
+          - 20
+        -
+          - 460
+          - 60
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: VDD
+      points:
+        -
+          - 460
+          - 120
+        -
+          - 460
+          - 160
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: noConn
+      points:
+        -
+          - 460
+          - -550
+        -
+          - 460
+          - -510
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: VSS
+      points:
+        -
+          - 460
+          - -140
+        -
+          - 460
+          - -100
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: clk
+      points:
+        -
+          - 460
+          - -40
+        -
+          - 460
+          - 0
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: VDD
+      origin:
+        - 53
+        - 484
+      alignment: 2
+      orient: R90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: VDD
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: out
+      origin:
+        - 144
+        - 427
+      alignment: 2
+      orient: R0
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: out
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: VSS
+      origin:
+        - 53
+        - 316
+      alignment: 8
+      orient: R90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: VSS
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: in
+      origin:
+        - -24
+        - 427
+      alignment: 8
+      orient: R0
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: in
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: VSS
+      origin:
+        - 453
+        - 56
+      alignment: 8
+      orient: R90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: VSS
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: VDD
+      origin:
+        - 453
+        - 124
+      alignment: 2
+      orient: R90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: VDD
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: VSS
+      points:
+        -
+          - 60
+          - 320
+        -
+          - 60
+          - 340
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: noConn
+      origin:
+        - 453
+        - -546
+      alignment: 2
+      orient: R90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: noConn
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: clk
+      origin:
+        - 453
+        - -36
+      alignment: 2
+      orient: R90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: clk
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: VSS
+      origin:
+        - 453
+        - -104
+      alignment: 8
+      orient: R90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: VSS
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: VSS
+      points:
+        -
+          - 360
+          - 120
+        -
+          - 360
+          - 160
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: VSS
+      origin:
+        - 353
+        - 124
+      alignment: 2
+      orient: R90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: VSS
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: VSS
+      points:
+        -
+          - 460
+          - -300
+        -
+          - 460
+          - -260
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: VSS
+      origin:
+        - 453
+        - -264
+      alignment: 8
+      orient: R90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: VSS
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: in
+      points:
+        -
+          - 460
+          - -200
+        -
+          - 460
+          - -160
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: in
+      origin:
+        - 453
+        - -196
+      alignment: 2
+      orient: R90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: in
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: VSS
+      points:
+        -
+          - 460
+          - -460
+        -
+          - 460
+          - -420
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: VSS
+      origin:
+        - 453
+        - -424
+      alignment: 8
+      orient: R90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: VSS
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: out
+      points:
+        -
+          - 460
+          - -360
+        -
+          - 460
+          - -320
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: out
+      origin:
+        - 453
+        - -356
+      alignment: 2
+      orient: R90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: out
+instances:
+  CLOAD:
+    lib_name: analogLib
+    cell_name: cap
+    view_name: symbol
+    xform:
+      - 460
+      - -360
+      - R0
+    bbox:
+      - 338
+      - -424
+      - 554
+      - -356
+    connections:
+      MINUS: VSS
+      PLUS: out
+    params:
+      c:
+        - 3
+        - cload
+    is_primitive: true
+  I0:
+    lib_name: analogLib
+    cell_name: gnd
+    view_name: symbol
+    xform:
+      - 360
+      - 20
+      - R0
+    bbox:
+      - 350
+      - -20
+      - 434
+      - 24
+    connections:
+      gnd!: gnd!
+    params:
+      {}
+    is_primitive: true
+  VCLK:
+    lib_name: analogLib
+    cell_name: vpwlf
+    view_name: symbol
+    xform:
+      - 460
+      - -40
+      - R0
+    bbox:
+      - 343
+      - -104
+      - 554
+      - -36
+    connections:
+      MINUS: VSS
+      PLUS: clk
+    params:
+      {}
+    is_primitive: true
+  VIN:
+    lib_name: analogLib
+    cell_name: vpwlf
+    view_name: symbol
+    xform:
+      - 460
+      - -200
+      - R0
+    bbox:
+      - 343
+      - -264
+      - 554
+      - -196
+    connections:
+      MINUS: VSS
+      PLUS: in
+    params:
+      {}
+    is_primitive: true
+  VSUP:
+    lib_name: analogLib
+    cell_name: vdc
+    view_name: symbol
+    xform:
+      - 460
+      - 120
+      - R0
+    bbox:
+      - 338
+      - 56
+      - 554
+      - 124
+    connections:
+      MINUS: VSS
+      PLUS: VDD
+    params:
+      vdc:
+        - 3
+        - vdd
+    is_primitive: true
+  VVSS:
+    lib_name: analogLib
+    cell_name: vdc
+    view_name: symbol
+    xform:
+      - 360
+      - 120
+      - R0
+    bbox:
+      - 238
+      - 56
+      - 454
+      - 124
+    connections:
+      MINUS: gnd!
+      PLUS: VSS
+    params:
+      vdc:
+        - 3
+        - 0
+    is_primitive: true
+  XDUT:
+    lib_name: bag3_testbenches
+    cell_name: dut
+    view_name: symbol
+    xform:
+      - -20
+      - 320
+      - R0
+    bbox:
+      - -24
+      - 316
+      - 218
+      - 484
+    connections:
+      VDD: VDD
+      VSS: VSS
+      in: in
+      out: out
+    params:
+      {}
+    is_primitive: false
+  XNC:
+    lib_name: basic
+    cell_name: noConn
+    view_name: symbol
+    xform:
+      - 460
+      - -550
+      - R0
+    bbox:
+      - 450
+      - -600
+      - 470
+      - -546
+    connections:
+      noConn: noConn
+    params:
+      {}
+    is_primitive: true
+props:
+  connectivityLastUpdated:
+    - 0
+    - 7776
+  instance#:
+    - 0
+    - 1
+  instancesLastChanged:
+    - 4
+    - time_val: 1570494116
+  lastSchematicExtraction:
+    - 4
+    - time_val: 1570494787
+  net#:
+    - 0
+    - 2
+  schGeometryLastUpdated:
+    - 0
+    - 7776
+  schGeometryVersion:
+    - 3
+    - sch.ds.gm.1.4
+  schXtrVersion:
+    - 3
+    - sch.10.0
+app_defs:
+  _dbLastSavedCounter:
+    - 0
+    - 7776
+  _dbvCvTimeStamp:
+    - 0
+    - 7776
+  cdbRevision:
+    - 0
+    - 227612

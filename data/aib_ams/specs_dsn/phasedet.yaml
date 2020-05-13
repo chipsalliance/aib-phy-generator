@@ -1,0 +1,283 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2019 Blue Cheetah Analog Design Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+dsn_class: aib_ams.design.phase_det.PhaseDetectorDesigner
+root_dir: gen_outputs/dsn_phasedet
+impl_lib: AAA_DSN_PHASEDET
+precision: 8
+
+dsn_params:
+  dig_tran_specs:
+    sim_envs: ['tt_25']
+    sim_params:
+      t_rst: 100.0e-12
+      t_rst_rf: 20.0e-12
+      t_bit: 1.0e-9
+      t_rf: 20.0e-12
+
+    thres_lo: 0.1
+    thres_hi: 0.9
+    rtol: 1.0e-8
+    atol: 1.0e-22
+    tran_options:
+      maxstep: 1.0e-12
+      errpreset: conservative
+
+  sup_values:
+    VDD: {tt_25: 0.9}
+    VSS: 0.0
+
+  c_load: 3.0e-15
+  w_min: 2
+  w_res: 1
+  t_rf: 20.0e-12
+  vm_pitch: 2.5
+
+  se2diff_params:
+    inv_char_params:
+      seg: 4
+      w_p: 4
+      w_n: 4
+      r_src_delay: 2800
+      c_in: 0.25e-15
+      c_load: 5.0e-15
+      scale_min: 0.1
+      scale_max: 10
+      num_samples: 41
+    pg_char_params:
+      seg: 4
+      w_p: 4
+      w_n: 4
+      r_src_delay: 1400
+      c_in: 0.5e-15
+      c_load: 5.0e-15
+      scale_min: 0.1
+      scale_max: 10
+      num_samples: 11
+    buf_config:
+      lch: 36
+      w_p: 2
+      w_n: 2
+      th_p: lvt
+      th_n: lvt
+      cinv_unit: 3.0e-16
+      cin_guess: 3.0e-15
+      fanout_in: 4
+      fanout_buf: 4
+    search_params:
+      low: 1.0e-17
+      high: !!null
+      step: 3.0e-15
+      tol: 1.0e-17
+      max_err: 1.0e-9
+      overhead_factor: 10
+    max_iter: 10
+    err_targ_inv2_inv4: 0.04
+    err_targ_total: 0.1
+    fanout_max: 4.0
+    area_min_inv1: 4
+    area_min_inv2: 20
+    area_min_pg: 20
+    search_step: 2
+    t_step_min: 0.1e-12
+    ridx_n: 0
+    ridx_p: -1
+
+  flop_params:
+    sa_params:
+      seg_dict:
+        in: 2
+        nfb: 4
+        pfb: 4
+        tail: 4
+        sw: 1
+      has_bridge: True
+    sr_params:
+      seg_dict:
+        fb: 1
+        ps: 2
+        nr: 2
+        ibuf: 2
+        obuf: 2
+        rst: 2
+      has_outbuf: True
+    has_rstlb: True
+    vm_pitch: 2.5
+
+  sign_off_envs: [tt_25]
+
+  cin_params:
+    buf_params:
+      inv_params:
+        - {lch: 36, w_p: 2, w_n: 2, th_p: lvt, th_n: lvt, seg: 1}
+        - {lch: 36, w_p: 2, w_n: 2, th_p: lvt, th_n: lvt, seg: 4}
+      export_pins: True
+    search_params:
+      low: 1.0e-17
+      high: !!null
+      step: 1.0e-15
+      tol: 1.0e-17
+      max_err: 1.0e-9
+      overhead_factor: 5
+    err_targ: 0.02
+    search_step: 2
+
+  meas_specs:
+    buf_params:
+      inv_params:
+        - lch: 36
+          seg: 2
+          w_p: 2
+          w_n: 2
+          th_p: standard
+          th_n: standard
+        - lch: 36
+          seg: 2
+          w_p: 2
+          w_n: 2
+          th_p: standard
+          th_n: standard
+    intv_params:
+      low: 0.0
+      high: 1.0e-9
+      step: 0.0
+      tol: 1.0e-12
+      max_err: 1.0e-12
+      overhead_factor: 1.0
+    strongarm_offset_params: {}
+    tbm_specs:
+      sim_params:
+        t_rst: 1.0e-9
+        t_rst_rf: 20.0e-12
+        t_bit: 1.0e-9
+        t_rf: 20.0e-12
+        cload: 10.0e-15
+        t_sim: 5.0e-9
+      pwr_domain:
+        CLKA: [VSS, VDD]
+        CLKB: [VSS, VDD]
+        RSTb: [VSS, VDD]
+        t_up: [VSS, VDD]
+        t_down: [VSS, VDD]
+      sup_values:
+        VDD: 0.85
+        VSS: 0.0
+
+  tile_se_to_diff: logic
+  tile_dummy: strongarm
+  tiles_flop: [{name: strongarm}, {name: sr, flip: True}]
+  tiles_phasedet:
+    - name: logic
+    - name: logic
+      flip: True
+    - name: strongarm
+    - name: sr
+      flip: True
+  tile_specs:
+    arr_info:
+      lch: 36
+      top_layer: 5
+      tr_widths: {}
+      tr_spaces: {}
+
+    place_info:
+      logic:
+        row_specs:
+          - mos_type: nch
+            width: 4
+            threshold: lvt
+            bot_wires:
+              data: [sup, 'sig<0:1>']
+              shared: [sup]
+            top_wires: ['sig<0:1>']
+            flip: True
+          - mos_type: pch
+            width: 4
+            threshold: lvt
+            bot_wires: ['sig<0:1>']
+            top_wires:
+              data: ['sig<0:1>', sup]
+              shared: [sup]
+      sr:
+        row_specs:
+          - mos_type: nch
+            width: 4
+            threshold: lvt
+            bot_wires:
+              data: [sup, 'sig<0:1>']
+              shared: [sup]
+            top_wires: ['sig<0>', 'sig_hs<0:1>', 'sig<1>']
+            flip: True
+          - mos_type: pch
+            width: 4
+            threshold: lvt
+            bot_wires: ['sig<0:1>']
+            top_wires:
+              data: ['sig<0:1>', sup]
+              shared: [sup]
+      strongarm:
+        bot_mirror: False
+        top_mirror: False
+        row_specs:
+          - mos_type: nch
+            width: 4
+            threshold: lvt
+            bot_wires:
+              data:
+                - wires: ['sup', 'tail']
+                - wires: ['sup', 'sig']
+              shared: [sup]
+            top_wires:
+              data:
+                - wires: ['sig<0:1>']
+            flip: True
+          - mos_type: nch
+            width: 4
+            threshold: lvt
+            bot_wires:
+              data:
+                - wires: ['sig']
+            top_wires:
+              data:
+                - wires: [['sig<0:2>', G_MATCH]]
+            flip: True
+          - mos_type: nch
+            width: 4
+            threshold: lvt
+            bot_wires:
+              data:
+                - wires: ['sig']
+            top_wires:
+              data:
+                - wires: ['sig<0:1>', ['sig<2>', DS_MATCH]]
+          - mos_type: pch
+            width: 4
+            threshold: lvt
+            bot_wires:
+              data:
+                - wires: [['sig<0>', DS_MATCH], 'sig<1:2>']
+            top_wires:
+              data:
+                - wires: ['sig<0:1>', 'sup']
+              shared: [sup]
+            flip: True
+
+    abut_list:
+      - edges: [[sr, 1], [strongarm, 1]]
+        shared1: [sup]
+        shared2: [sup]
+      - edges: [[logic, 0], [strongarm, 0]]
+        shared1: [sup]
+        shared2: [sup]

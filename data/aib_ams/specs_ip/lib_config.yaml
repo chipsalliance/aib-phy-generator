@@ -1,0 +1,84 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2019 Blue Cheetah Analog Design Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+revision: "2020.0"
+precision: 4
+units:
+  voltage: 1.0
+  current: 1.0e-3
+  time: 1.0e-12
+  capacitance: 1.0e-15
+  resistance: 1.0e3
+  power: 1.0e-6
+
+environments:
+  nom_voltage_type: VDDCORE
+  name_format: "{sim_env}_{VDDCORE}_{VDDIO}"
+  voltage_precision: 3
+  sim_envs:
+    - sim_env: tt_25
+      voltages:
+        VDDIO: 0.8
+        VDDCORE: 0.9
+        VSS: 0.0
+
+lut:
+  CONSTRAINT:
+    # constrained pin transition
+    trf_in: [20.0e-12, 40.0e-12, 160.0e-12]
+    # related pin transition
+    trf_src: [20.0e-12, 40.0e-12, 160.0e-12]
+  DELAY:
+    # input net transition
+    trf_src: [20.0e-12, 60.0e-12, 120.0e-12]
+    # total output net capacitance
+    cload: [1.0e-15, 10.0e-15, 40.0e-15]
+  MAX_CAP:
+    # frequency
+    freq: [50.0e6, 400.0e6, 1.6e9]
+  DRIVE_WVFM:
+    # input net transition
+    trf_src: [20.0e-12, 40.0e-12, 160.0e-12]
+    # normalized voltage
+    vout: [0.0, 0.5, 1.0]
+
+norm_drv_wvfm:
+  - name: "driver_waveform"
+    val:
+      - [0, 10.0e-12, 20.0e-12]
+      - [0, 20.0e-12, 40.0e-12]
+      - [0, 80.0e-12, 160.0e-12]
+
+thresholds:
+  slew_derate: 1
+  input_fall: 50
+  input_rise: 50
+  output_fall: 50
+  output_rise: 50
+  lower_fall: 10
+  lower_rise: 10
+  upper_fall: 90
+  upper_rise: 90
+
+defaults:
+  threshold_voltage_group: nom
+  fanout_load: 1
+  cell_leakage_power: 0
+  inout_pin_cap: 0
+  input_pin_cap: 0
+  output_pin_cap: 0
+  leakage_power_density: 0
+  max_transition: 5.0e-9
