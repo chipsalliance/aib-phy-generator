@@ -116,8 +116,9 @@ dcc_helper.yaml  output_driver.yaml  phase_interp.yaml      se_to_diff.yaml
 delay_line.yaml  output_pu_pd.yaml   rxanlg.yaml            txanlg.yaml  
 frontend.yaml    phasedet.yaml       se_to_diff_match.yaml  
 
-The top level generators are rxanlg, txanlg, frontend, and phase_interp.  The
-other generators are called by the top level generators.
+The above yaml files and associated generators produce A/MS instances 
+of their respective blocks. These instances are called within the pnr flow 
+of the AIB PHY.
 
 3. Source `.bashrc`/`.cshrc` in your terminal.  
 source .bashrc
