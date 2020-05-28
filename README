@@ -11,9 +11,7 @@ info@bcanalog.com
     *   Virtuoso
     *   Pegasus/PVS (for running LVS)
     *   SRR (for reading spectre data)
-*   OpenAccess
-    *   cdsLibPlugin (available for public download)
-*   A full list of dependencies and versions are detailed in Appendix A below.
+*   A full list of dependencies and versions is in Appendix A below.
 
 *----------------------------------------
 # Installing the AIB Generator
@@ -30,26 +28,23 @@ computer that is connected to the internet.  Download "git for windows"
 a means to have the Windows machine mount your target directory used by the 
 Linux computer.
 
-2. Download the Cadence Generic Process Design Kit
+2. Download the Cadence Generic Process Design Kit into your target directory.
 Use the web address shown in Table 1.  Cadence requires a login. Navigate to 
 the page "Generic Process Design Kits (GPDK) Downloads.”  Select and download
 the file into your target ~/aib directory.
     ADVGPDK (Version 0.5) - Advanced Node 0.8V / 1.8V Finfet / Multi Patterned 
     8 Metal Generic PDK: cds_ff_mpt_v_0.5 (1.2GB)**
 List the file
+cd ~/aib
 ls cds_ff_mpt_v_0.5.tar.gz  
 cds_ff_mpt_v_0.5.tar.gz  
 
-3. Download the OpenAccess files. 
-// WIP // To Be Documented: Process for compiling OpenAccess files for use by the
-AIB Generator.
- 
-4. From the target directory, extract from gzip and tar.
+3. From the target directory, extract from gzip and tar.
 cd ~/aib  
 gunzip cds_ff_mpt_v_0.5.tar.gz  
 tar xvf cds_ff_mpt_v_0.5.tar  
 
-5. Download the remaining components from the Blue Cheetah repositories from 
+4. Download the remaining components from the Blue Cheetah repositories from 
 github.com into your target diretory.
 
 cd ~/aib/aib-phy-generator  
@@ -57,13 +52,26 @@ git clone https://github.com/bluecheetah/xbase.git xbase_bcad
 git clone https://github.com/bluecheetah/bag.git BAG_framework  
 git clone https://github.com/bluecheetah/cds_ff_mpt.git cds_ff_mpt  
 
+5. Acquire the Python packages in Appendix A and install.
+Alternatively, you may contact Blue Cheetah Analog Design, Inc. for support at
+    info@bcanalog.com  
+and request the "bag3d" tar file for aib-phy-generator. Install the Blue Cheetah file
+bag3d0_rhel60_64_May29_2020.tar.gz 
+into your target directory, ~/aib in this example.
+Unzip the bag3d file:
+cd ~/aib
+gunzip bag3d0_rhel60_64_May29_2020.tar.gz
+Extract the bag3d files:
+cd ~/aib/aib-phy-generator  
+tar xvf ../bag3d0_rhel60_64_May29_2020.tar
+
 6. If you performed the "git clone" operations on a Windows system, you will 
 need to run these commands from Linux since Windows cannot create a symbolic 
 link.
 cd ~/aib/aib-phy-generator  
 mkdir -p BAG_framework/pybag/_build/lib  
-// WIP // cd BAG_framework/pybag/_build/lib  
-// WIP // ln -s ../../../../bag3d0_rhel60_64/pybag .  
+cd BAG_framework/pybag/_build/lib  
+ln -s ../../../../bag3d0_rhel60_64/pybag .  
 cd ~/aib/aib-phy-generator/cds_ff_mpt/workspace_setup  
 rm PDK  
 ln -s ../../../cds_ff_mpt_v_0.5 PDK  
@@ -122,7 +130,6 @@ of the AIB PHY.
 
 3. Source `.bashrc`/`.cshrc` in your terminal.  
 source .bashrc
-
 
 4.  Run `start_bag.sh` to make sure that IPython interpreter starts successfully.
 
