@@ -52,7 +52,7 @@ git clone https://github.com/bluecheetah/xbase.git xbase_bcad
 git clone https://github.com/bluecheetah/bag.git BAG_framework  
 git clone https://github.com/bluecheetah/cds_ff_mpt.git cds_ff_mpt  
 
-5. Acquire the Python packages in Appendix A and install.
+5. Acquire the packages in Appendix A and install.
 Alternatively, you may contact Blue Cheetah Analog Design, Inc. for support at
     info@bcanalog.com  
 and request the "bag3d" tar file for aib-phy-generator. Install the Blue Cheetah file
@@ -60,10 +60,10 @@ bag3d0_rhel60_64_May29_2020.tar.gz
 into your target directory, ~/aib in this example.
 Unzip the bag3d file:
 cd ~/aib
-gunzip bag3d0_rhel60_64_May29_2020.tar.gz
+gunzip bag3d0_rhel60_64_may29_2020.tar.gz
 Extract the bag3d files:
 cd ~/aib/aib-phy-generator  
-tar xvf ../bag3d0_rhel60_64_May29_2020.tar
+tar xvf ../bag3d0_rhel60_64_may29_2020.tar
 
 6. If you performed the "git clone" operations on a Windows system, you will 
 need to run these commands from Linux since Windows cannot create a symbolic 
@@ -131,20 +131,11 @@ of the AIB PHY.
 3. Source `.bashrc`/`.cshrc` in your terminal.  
 source .bashrc
 
-4.  Run `start_bag.sh` to make sure that IPython interpreter starts successfully.
-
-5.  Execute the following commands in python to make sure there are no errors:    
-    
-    > import h5py  
-    > import pybag  
-    > import pybag.core  
-    > exit  
-    
-6.  Run the following to start phase interpolator design script:  
+4.  Run the following to start phase interpolator design script:  
  ./run_bag.sh BAG_framework/run_scripts/dsn_cell.py data/aib_ams/specs_dsn/phase_interp.yaml  
     There are other yaml files in the 'specs_dsn' folder to run through different design scripts.
 
-7.  Generating other views:
+5.  Generating other views:
     To generate a lef for a block, run the following command:
 ./run_bag.sh BAG_framework/run_scripts/gen_cell.py data/aib_ams/specs_ip/txanlg.yaml -lef  
 
