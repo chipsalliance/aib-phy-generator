@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2019 Blue Cheetah Analog Design Inc.
+# Copyright 2020 Blue Cheetah Analog Design Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,9 +24,14 @@ from bag3_digital.design.base import DigitalDesigner
 from bag3_digital.design.lvl_shift_de import LvlShiftDEDesigner
 from bag3_digital.design.lvl_shift_ctrl import LvlShiftCtrlDesigner
 
+from bag.layout.util import IPMarginTemplate
+
 from .se_to_diff_en import SingleToDiffEnableDesigner
 from ..layout.rxanlg import RXAnalog
 
+from bag3_digital.layout.stdcells.util import STDCellWrapper
+
+from xbase.layout.mos.top import GenericWrapper
 
 class RXAnalogDesigner(DigitalDesigner):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -200,6 +205,9 @@ class RXAnalogDesigner(DigitalDesigner):
         specs = self.dsn_specs
         yaml_file: str = specs.get('yaml_file', '')
 
+        gen_specs: Optional[Mapping[str, Any]] = kwargs.get('gen_cell_specs', None)
+        gen_cell_args: Optional[Mapping[str, Any]] = kwargs.get('gen_cell_args', None)
+
         data_lv_results = await self.design_data_lv()
         se_en_results = await self.design_se_en(data_lv_results['c_in'])
 
@@ -244,6 +252,24 @@ class RXAnalogDesigner(DigitalDesigner):
 
         if yaml_file:
             write_yaml(self.work_dir / yaml_file, ans)
+        if gen_specs is not None and gen_cell_args is not None:
+            pinfo = dict(
+                name=specs['tile_name'],
+                tile_specs=specs['tile_specs'],
+            )
+            rx_params['pinfo'] = pinfo
+            gen_cell_specs = dict(
+                lay_class=IPMarginTemplate.get_qualified_name(),
+                params=dict(
+                    cls_name=GenericWrapper.get_qualified_name(),
+                    params=dict(
+                        cls_name=RXAnalog.get_qualified_name(),
+                        params=rx_params,
+                    ),
+                ),
+                **gen_specs,
+            )
+            return dict(gen_specs=gen_cell_specs, gen_args=gen_cell_args)
 
         return ans
 

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2019 Blue Cheetah Analog Design Inc.
+# Copyright 2020 Blue Cheetah Analog Design Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,19 +12,30 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 dsn_class: aib_ams.design.frontend.FrontendDesigner
 root_dir: gen_outputs/dsn_frontend
 impl_lib: AAA_DSN_FRONTEND
 precision: 8
 dsn_params:
+  gen_cell_specs:
+    impl_lib: AAA_DSN_FRONTEND
+    impl_cell: aib_frontend
+    root_dir: gen_outputs/aib_frontend
+  gen_cell_args:
+    gen_lay: True
+    gen_sch: True
+    gen_model: True
+    run_lvs: True
+    gen_lef: True
   tile_name: logic
   stack_max: 10
   tile_specs:
+    abut_list: []
     arr_info:
       lch: 36
       top_layer: 5
       tr_widths:
+        sig: {1: 1, 2: 1}
         sup: {2: 2, 3: 2, 4: 2, 5: 2}
         guard: {2: 2, 3: 2, 4: 2}
         sig_hs: {2: 2, 3: 2, 4: 1, 5: 2}
@@ -35,26 +46,25 @@ dsn_params:
     place_info:
       logic:
         row_specs:
-          - mos_type: nch
-#            width: 4
-            threshold: lvt
-            bot_wires:
+          - bot_wires:
               data:
-                - wires: ['sup', 'sig<0:2>']
-                - wires: ['sig<0>', 'padout']
+                - wires: [sup, 'sig<0:3>']
+                - wires: [sig<0>, padout]
               shared: [sup]
-            top_wires: ['sig<0:2>']
-            flip: True
-          - mos_type: pch
-#            width: 4
+            flip: true
+            mos_type: nch
+            threshold: lvt
+            top_wires: ['sig<0:3>']
+            width: 8
+          - bot_wires: ['sig<0:3>']
+            mos_type: pch
             threshold: lvt
             top_wires:
               data:
-                - wires: ['sig<0:2>', 'sup']
-                - wires: ['padout', 'sig<2>']
+                - wires: ['sig<0:3>', sup]
+                - wires: [padout, sig<3>]
               shared: [sup]
-            bot_wires: ['sig<0:2>']
-    abut_list: []
+            width: 8
 
   # RX Specs
   rx_specs_file: 'data/aib_ams/specs_dsn/rxanlg.yaml'

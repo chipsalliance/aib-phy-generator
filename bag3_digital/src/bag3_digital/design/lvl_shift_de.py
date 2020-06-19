@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2019 Blue Cheetah Analog Design Inc.
+# Copyright 2020 Blue Cheetah Analog Design Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -77,6 +77,10 @@ class LvlShiftDEDesigner(DigitalDesigner):
         self._w_n_list: Sequence[int] = []
         self._td_specs: Dict[str, Any] = {}
         self._cin_specs: Dict[str, Any] = {}
+        if 'w_p_list' in kwargs:
+            self._w_p_list = kwargs['w_p_list']
+        if 'w_n_list' in kwargs:
+            self._w_n_list = kwargs['w_n_list']
 
         super().__init__(*args, **kwargs)
 
@@ -96,8 +100,19 @@ class LvlShiftDEDesigner(DigitalDesigner):
         self._pinfo = self.get_tile(tile_name)
         w_n_max = self._pinfo.get_row_place_info(ridx_n).row_info.width
         w_p_max = self._pinfo.get_row_place_info(ridx_p).row_info.width
-        self._w_n_list = list(range(w_min, w_n_max + 1, w_res))
-        self._w_p_list = list(range(w_min, w_p_max + 1, w_res))
+
+        if 'w_n_list' in specs:
+            for wn in specs['w_n_list']:
+                if wn <= w_n_max:
+                    self._w_n_list.append(wn)
+        else:
+            self._w_n_list = list(range(w_min, w_n_max + 1, w_res))
+        if 'w_p_list' in specs:
+            for wp in specs['w_p_list']:
+                if wp <= w_p_max:
+                    self._w_p_list.append(wp)
+        else:
+            self._w_p_list = list(range(w_min, w_p_max + 1, w_res))
 
         pwr_tup = ('VSS', 'VDD')
         pwr_tup_in = ('VSS', 'VDDI')
@@ -163,6 +178,13 @@ class LvlShiftDEDesigner(DigitalDesigner):
         dual_output: bool = lv_params.get('dual_output', True)
         seg_prst: int = lv_params.get('seg_prst', 0)
 
+        extra_params: Mapping[str, Any] = {}
+        default_keys = ['stack_p', 'has_rst', 'in_upper', 'dual_output', 'seg_prst']
+        for cur_key in lv_params.keys():
+            if cur_key not in default_keys:
+                extra_params[cur_key] = lv_params[cur_key]
+
+
         c_unit_n_seg = self._get_c_in_guess(0, 1, w_p, w_n)
         c_unit_p_seg = self._get_c_in_guess(1, 0, w_p, w_n)
         c_unit_inv = c_unit_n_seg + c_unit_p_seg
@@ -193,6 +215,7 @@ class LvlShiftDEDesigner(DigitalDesigner):
             in_upper=in_upper,
             ridx_n=ridx_n,
             ridx_p=ridx_p,
+            **extra_params,
         )
         self.log(f'init c_in={c_in_guess:.4g}, lv_params:\n'
                  f'{pprint.pformat(lv_shift_params, width=100)}')

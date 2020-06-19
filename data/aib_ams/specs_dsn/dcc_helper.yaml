@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2019 Blue Cheetah Analog Design Inc.
+# Copyright 2020 Blue Cheetah Analog Design Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 dsn_class: aib_ams.design.dcc_helper.DCCHelperDesigner
 root_dir: gen_outputs/aib_dcc_helper
 impl_lib: AAA_DCC_HELPER
@@ -24,6 +23,17 @@ dsn_params:
   fmin: 0.6e9
   dcd_max: 1.0e-2
   rel_del_max: 0.25
+  gen_cell_specs:
+    impl_lib: AAA_DCC_HELPER
+    impl_cell: aib_dcc_helper
+    root_dir: gen_outputs/aib_dcc_helper
+  gen_cell_args:
+    gen_lay: True
+    gen_sch: True
+    gen_model: True
+    run_lvs: True
+    gen_lef: True
+
 
   pinfo:
     lch: 36

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2019 Blue Cheetah Analog Design Inc.
+# Copyright 2020 Blue Cheetah Analog Design Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -76,7 +76,8 @@ class TXAnalogCoreDesigner(DesignerBase):
                            sim_options: Optional[Mapping[str, Any]] = None,
                            mc_params: Optional[Dict[str, Any]] = None,
                            mc_corner: Optional[str] = '',
-                           specs_yaml_fname: Optional[str] = 'txanlg_specs.yaml'
+                           specs_yaml_fname: Optional[str] = 'txanlg_specs.yaml',
+                           **kwargs: Any
                            ) -> Mapping[str, Any]:
 
         """This function runs top level design on the TX.
@@ -208,10 +209,11 @@ class TXAnalogCoreDesigner(DesignerBase):
         print(f'Driver input capacitance is {driver_cdict["data"]}')
 
         # Design level shifters
+        extra_lv_params = kwargs.get('extra_lv_params', {})
         lv_params = dict(trf_in=trf_in, tile_specs=tile_specs, k_ratio_ctrl=k_ratio_ctrl,
                          k_ratio_data=k_ratio_data, tile_name=tile_name,
                          inv_input_cap_per_seg=inv_input_cap_per_seg,
-                         inv_input_cap_per_fin=input_cap_per_fin, has_rst=True)
+                         inv_input_cap_per_fin=input_cap_per_fin, has_rst=True, **extra_lv_params)
         lvshift_summary = {}
         for key, cload in driver_cdict.items():
             # td_lv_shift will be ignored in ctrl level shifters and max_fanout in tech_info will
@@ -234,6 +236,21 @@ class TXAnalogCoreDesigner(DesignerBase):
                                mc_params=mc_params, mc_corner=mc_corner)
 
         self.write_out_specs_yaml(summary, specs_yaml_fname)
+
+        gen_specs: Optional[Mapping[str, Any]] = kwargs.get('gen_cell_specs', None)
+        gen_cell_args: Optional[Mapping[str, Any]] = kwargs.get('gen_cell_args', None)
+
+
+        if gen_specs is not None and gen_cell_args is not None:
+            gen_cell_specs = dict(
+                lay_class=STDCellWrapper.get_qualified_name(),
+                params=dict(
+                    cls_name=TXAnalog.get_qualified_name(),
+                    params=lay_params,
+                ),
+                **gen_specs,
+            )
+            return dict(gen_specs=gen_cell_specs, gen_args=gen_cell_args)
 
         return summary
 

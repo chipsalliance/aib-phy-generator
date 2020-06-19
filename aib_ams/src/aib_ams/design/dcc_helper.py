@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2019 Blue Cheetah Analog Design Inc.
+# Copyright 2020 Blue Cheetah Analog Design Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -62,7 +62,8 @@ class DCCHelperDesigner(DesignerBase):
                            rel_del_max: float, pinfo: Mapping[str, any], 
                            core_params: Optional[Dict[str, Any]] = None,
                            sync_params: Optional[Dict[str, Any]] = None, 
-                           buf_params: Optional[Dict[str, Any]] = None) -> Mapping[str, Any]:
+                           buf_params: Optional[Dict[str, Any]] = None,
+                           **kwargs: Mapping[str, Any]) -> Mapping[str, Any]:
         """
         This design method is basically a logical-effort sizing and a sign-off in the end.
         If there are sizes passed in through optional parameters they will be used and this
@@ -101,6 +102,9 @@ class DCCHelperDesigner(DesignerBase):
         core_params = self._default_core_params() if core_params is None else core_params
         sync_params = self._default_sync_params() if sync_params is None else sync_params
         buf_params = self._default_buf_params() if buf_params is None else buf_params
+        gen_specs: Optional[Mapping[str, Any]] = kwargs.get('gen_cell_specs', None)
+        gen_cell_args: Optional[Mapping[str, Any]] = kwargs.get('gen_cell_args', None)
+
 
         if 'width' not in pinfo['row_specs'][0] and 'width' not in pinfo['row_specs'][1]:
             pinfo['row_specs'][0]['width'] = 2 * tech_globals['w_minn']
@@ -149,7 +153,16 @@ class DCCHelperDesigner(DesignerBase):
         del_rel_min = min(del_rel_dict.values())
         del_rel_max = max(del_rel_dict.values())
         self.log(f'|DCD| ranges from {dcd_min*100:.4f}% to {dcd_max*100:.4f}%.')
-        self.log(f'Relaive delay ranges from {del_rel_min*100:.4f}% to {del_rel_max*100:.4f}%')
+        self.log(f'Relative delay ranges from {del_rel_min*100:.4f}% to {del_rel_max*100:.4f}%')
+
+        if gen_specs is not None and gen_cell_args is not None:
+            gen_cell_specs = dict(
+                lay_class=STDCellWrapper.get_qualified_name(),
+                cls_name=DCCHelper.get_qualified_name(),
+                params=gen_params,
+                **gen_specs,
+            )
+            return dict(gen_specs=gen_cell_specs, gen_args=gen_cell_args)
 
         return gen_params
 

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2019 Blue Cheetah Analog Design Inc.
+# Copyright 2020 Blue Cheetah Analog Design Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """This module contains layout generators for various latches."""
 
 from typing import Any, Dict, Optional, Type, Tuple, Mapping
@@ -32,7 +31,7 @@ from ...schematic.sr_latch_symmetric import bag3_digital__sr_latch_symmetric
 
 
 class SRLatchSymmetricHalf(MOSBase):
-    """A inverter with only transistors drawn, no metal connections
+    """Half of symmetric SR latch
     """
 
     def __init__(self, temp_db: TemplateDB, params: Param, **kwargs: Any) -> None:
@@ -193,7 +192,8 @@ class SRLatchSymmetricHalf(MOSBase):
 
             rstb = self.connect_to_tracks(m_rst.g, rst_tid, min_len_mode=MinLenMode.MIDDLE)
             rst_vm_tidx = grid.coord_to_track(vm_layer, rstb.middle, mode=RoundMode.GREATER_EQ)
-            rstb_vm = self.connect_to_tracks(rstb, TrackID(vm_layer, rst_vm_tidx, width=vm_w))
+            rstb_vm = self.connect_to_tracks(rstb, TrackID(vm_layer, rst_vm_tidx, width=vm_w),
+                                             min_len_mode=MinLenMode.MIDDLE)
             self.add_pin('rstb', rstb_vm)
         else:
             pq_conn_list = [m_ps.d, m_pfb.s]

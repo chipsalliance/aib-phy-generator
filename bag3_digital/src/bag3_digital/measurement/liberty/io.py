@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2019 Blue Cheetah Analog Design Inc.
+# Copyright 2020 Blue Cheetah Analog Design Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -86,8 +86,8 @@ async def async_generate_liberty(prj: BagProject, lib_config: Mapping[str, Any],
     gen_specs: Mapping[str, Any] = read_yaml(gen_specs_file)
     impl_lib: str = gen_specs['impl_lib']
     impl_cell: str = gen_specs['impl_cell']
-    lay_cls: str = gen_specs['lay_class']
-    dut_params: Mapping[str, Any] = gen_specs['params']
+    lay_cls: str = gen_specs.get('lay_class', '')
+    dut_params: Optional[Mapping[str, Any]] = gen_specs.get('params', None)
     name_prefix: str = gen_specs.get('name_prefix', '')
     name_suffix: str = gen_specs.get('name_suffix', '')
     gen_root_dir: Path = Path(gen_specs['root_dir'])
@@ -104,8 +104,11 @@ async def async_generate_liberty(prj: BagProject, lib_config: Mapping[str, Any],
     log_file = str(lib_root_dir / 'lib_gen.log')
     sim_db = prj.make_sim_db(lib_root_dir / 'dsn', log_file, impl_lib, dsn_options=dsn_options,
                              force_sim=force_sim, precision=sim_precision, log_level=log_level)
-    dut = await sim_db.async_new_design(impl_cell, lay_cls, dut_params, export_lay=export_lay,
-                                        name_prefix=name_prefix, name_suffix=name_suffix)
+    if lay_cls and dut_params is not None:
+        dut = await sim_db.async_new_design(impl_cell, lay_cls, dut_params, export_lay=export_lay,
+                                            name_prefix=name_prefix, name_suffix=name_suffix)
+    else:
+        dut = None
 
     environments: Mapping[str, Any] = lib_config['environments']
     nom_voltage_type: str = environments['nom_voltage_type']
@@ -231,6 +234,9 @@ def get_cell_info(lib: Library, impl_cell: str, cell_specs: Mapping[str, Any], l
         out_io_info_table=out_io_info_table,
         seq_timing=seq_timing,
         custom_meas=custom_meas,
+        in_pin_list=in_pin_list,
+        out_pin_list=out_pin_list,
+        io_pin_list=io_pin_list,
 
         delay_shape=delay_shape,
         delay_swp_info=delay_swp_info,

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2019 Blue Cheetah Analog Design Inc.
+# Copyright 2020 Blue Cheetah Analog Design Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import numpy as np
 from pandocfilters import Math
 import matplotlib.pyplot as plt
 
-from bag.util.search import BinaryIterator, FloatBinaryIterator
+from bag.util.search import BinaryIterator, FloatBinaryIterator, BinaryIteratorInterval
 
 from xbase.layout.mos.placement.data import TileInfoTable
 
@@ -100,6 +100,18 @@ class LvlShiftDesigner(DesignerBase):
                                                                               vin, vout, worst_env)
         else:
             tint_tot = 0
+
+        gen_specs: Optional[Mapping[str, Any]] = kwargs.get('gen_cell_specs', None)
+        gen_cell_args: Optional[Mapping[str, Any]] = kwargs.get('gen_cell_args', None)
+
+        if gen_specs is not None and gen_cell_args is not None:
+            gen_cell_specs = dict(
+                lay_class=STDCellWrapper.get_qualified_name(),
+                cls_name=LevelShifter.get_qualified_name(),
+                params=dut_params,
+                **gen_specs,
+            )
+            return dict(gen_specs=gen_cell_specs, gen_args=gen_cell_args)
 
         return dict(dut_params=dut_params, tdr=tdr, tdf=tdf, tint=tint_tot, worst_var=worst_var)
 
@@ -267,46 +279,6 @@ class LvlShiftDesigner(DesignerBase):
                     worst_var = delay_var
                     worst_var_env = env
 
-            '''
-            # Debug
-            # -----
-            td_iinv_r, td_iinv_f = CombLogicTimingTB.get_output_delay(sim_results.data, tbm.specs, 'in',
-                                                          'inb_buf', True, in_pwr='vdd_in',
-                                                          out_pwr='vdd_in')
-            td_minv_r, td_minv_f = CombLogicTimingTB.get_output_delay(sim_results.data, tbm.specs, 'inb_buf',
-                                                          'in_buf', True, in_pwr='vdd_in',
-                                                          out_pwr='vdd_in')
-            td_pdn_r, td_pdn_f = CombLogicTimingTB.get_output_delay(sim_results.data, tbm.specs, 'in_buf',
-                                                          'midn', True, in_pwr='vdd_in',
-                                                          out_pwr='vdd')
-            td_oinv_r, td_oinv_f = CombLogicTimingTB.get_output_delay(sim_results.data, tbm.specs, 'midn',
-                                                          'out', True, in_pwr='vdd_in',
-                                                          out_pwr='vdd')
-            td_pdp_r, td_pdp_f = CombLogicTimingTB.get_output_delay(sim_results.data, tbm.specs, 'inb_buf',
-                                                          'midp', True, in_pwr='vdd_in',
-                                                          out_pwr='vdd')
-            td_pun_r, td_pun_f = CombLogicTimingTB.get_output_delay(sim_results.data, tbm.specs, 'midp',
-                                                          'midn', True, in_pwr='vdd',
-                                                          out_pwr='vdd')
-
-            if env == 'ss_125':
-                plt.figure()
-                plt.plot(sim_results.data['time'].flatten(), sim_results.data['in'].flatten(), 'b')
-                plt.plot(sim_results.data['time'].flatten(), sim_results.data['inb_buf'].flatten(), 'g')
-                plt.plot(sim_results.data['time'].flatten(), sim_results.data['in_buf'].flatten(), 'r')
-                plt.plot(sim_results.data['time'].flatten(), sim_results.data['midn'].flatten(), 'k')
-                plt.plot(sim_results.data['time'].flatten(), sim_results.data['midp'].flatten(), 'c')
-                plt.plot(sim_results.data['time'].flatten(), sim_results.data['out'].flatten(), 'm')
-                plt.legend(['in', 'inb_buf', 'in_buf', 'midn', 'midp', 'out'])
-                plt.title(f'{env}')
-                plt.show(block=False)
-
-                print(f'Path rise out: {td_iinv_r} + {td_minv_f} + {td_pdn_r} + {td_oinv_f}')
-                print(f'Path fall out: {td_iinv_f} + {td_pdp_r} + {td_pun_f} + {td_oinv_r}')
-                breakpoint()
-            # ----
-            '''
-
             # sign off reset
             if has_rst:
                 tbm_specs['stimuli_pwr'] = 'vdd'
@@ -326,7 +298,6 @@ class LvlShiftDesigner(DesignerBase):
         td_target = 20 * trf_in if is_ctrl else dmax
         self.log(f'td_target = {td_target}, worst_tdr = {worst_tdr}, worst_tdf = {worst_tdf}, '
                  f'worst_env = {worst_env}')
-        #breakpoint()
 
         if worst_tdr > td_target or worst_tdf > td_target:
             msg = 'Level shifter delay did not meet target.'
@@ -371,28 +342,16 @@ class LvlShiftDesigner(DesignerBase):
         print(f'cload = {cload}')
         inv_m = int(round(out_inv_input_cap / inv_input_cap))
         inv_m = max(1, inv_m)
-        pseg = int(round(2*inv_m / fanout))
+        beta = get_tech_global_info('bag3_digital')['inv_beta']
+        # pseg = int(round(2*inv_m / fanout))
+        # total equivalent inv load is inv_m so the PMOS size should be inv_m/fanout times beta
+        pseg = int(round(beta * inv_m / fanout))
         pseg = max(1, pseg)
         if pseg == 1 and not is_ctrl:
             print("="*80)
             print("WARNING: LvShift Designer: pseg has been set to 1; might want to remove output inverter.")
             print("="*80)
 
-        '''
-        # TODO: Find k_ratio based on functionality automatically rather than have it come from input params.
-        all_corners = get_tech_global_info('bag3_digital')['signoff_envs']['all_corners']
-        iterator = FloatBinaryIterator(low=1.0, high=10.0, tol=0.1)
-
-        while iterator.has_next():
-            k_cur = iterator.get_next()
-            nseg = int(np.round(pseg*k_cur))
-
-            dut_params = self._get_lvl_shift_core_params_dict(pinfo, pseg, nseg, has_rst, is_ctrl)
-            dut = await self.async_new_dut('lvshift_core', STDCellWrapper, dut_params)
-            functional = False
-            
-            for 
-        '''
 
         nseg = int(np.round(pseg * k_ratio))
 
@@ -433,14 +392,15 @@ class LvlShiftDesigner(DesignerBase):
                                         has_rst, dual_output, vin, vout) -> int:
         """
         This function figures out the NMOS nseg for the inverter given the target delay
-        TODO: Make this use digitaldB instead
         """
         min_fanout: float = get_tech_global_info('bag3_digital')['min_fanout']
         inv_beta: float = get_tech_global_info('bag3_digital')['inv_beta']
         tb_params = self._get_full_tb_params()
 
         # Use a binary iterator to find the NMOS size
-        max_nseg = int(np.round(nseg/min_fanout))
+        max_nseg = int(np.round(nseg/((1+inv_beta)*min_fanout)))
+        # iterator = BinaryIteratorInterval(get_tech_global_info('bag3_digital')['width_interval_list_n'],
+        #                                   1, max_nseg)
         iterator = BinaryIterator(1, max_nseg)
         load_seg = nseg + (pseg if has_rst else 0)
         inv_pseg = int(np.round(inv_beta*load_seg/((1+inv_beta)*fanout)))
@@ -470,7 +430,7 @@ class LvlShiftDesigner(DesignerBase):
                 target_cur, _ = CombLogicTimingTB.get_output_delay(sim_results.data, tbm.specs,
                                                                    'inb_buf', 'midp', True,
                                                                    in_pwr='vdd_in', out_pwr='vdd')
-
+                print("Balance internal delays inv_pdn Info: ", env, tdr_cur, target_cur)
                 # Check for error conditions
                 if math.isinf(np.max(tdr_cur)) or math.isinf(np.max(tdf_cur)) or math.isinf(np.max(target_cur)):
                     raise ValueError("Got infinite delay in level shifter design script (sizing inverter NMOS).")
@@ -484,10 +444,6 @@ class LvlShiftDesigner(DesignerBase):
                     tdr = tdr_cur[0]
                     target = target_cur[0]
 
-            '''
-            print(f'iter: {inv_nseg}')
-            print(f'env: {worst_env}, tdr: {tdr}, target: {target}')
-            '''
 
             if tdr < target:
                 iterator.down(target-tdr)
@@ -509,7 +465,6 @@ class LvlShiftDesigner(DesignerBase):
         """
         Given the NMOS pull down size, this function will design the PMOS pull up so that the delay
         mismatch is minimized.
-        # TODO: Need to double check on how this handles corners
         """
         inv_beta = get_tech_global_info('bag3_digital')['inv_beta']
         tb_params = self._get_full_tb_params()
@@ -517,7 +472,15 @@ class LvlShiftDesigner(DesignerBase):
         load_seg = nseg + (pseg if has_rst else 0)
         inv_pseg_nom = int(np.round(inv_beta*load_seg / ((1+inv_beta)*fanout)))
         inv_pseg_nom = 1 if inv_pseg_nom == 0 else inv_pseg_nom
-        iterator = BinaryIterator(-inv_pseg_nom+1, 0)
+        inv_nseg_nom = inv_nseg # save the value of nseg coming into this function as nominal
+        range_to_vary = min(inv_pseg_nom, inv_nseg)
+        iterator = BinaryIterator(-range_to_vary+1, 1) # upper limit is exclusive hence using 1 instead of 0
+        # variation will be done such that the total P+N segments remains the same
+        # This allows the input inverter sizing to be done once at the start
+
+        # iterator = BinaryIterator(-inv_pseg_nom+1, 0)
+        # iterator = BinaryIteratorInterval(get_tech_global_info('bag3_digital')['width_interval_list_p'],
+        #                                   -inv_pseg_nom+1, 0)
         err_best = float('inf')
         inv_in_nseg, inv_in_pseg = self._size_input_inv_for_fanout(inv_pseg_nom, inv_nseg, pseg, nseg, fanout, has_rst)
         all_corners = get_tech_global_info('bag3_digital')['signoff_envs']['all_corners']
@@ -525,8 +488,9 @@ class LvlShiftDesigner(DesignerBase):
         while iterator.has_next():
             pseg_off = iterator.get_next()
             inv_pseg = inv_pseg_nom + pseg_off
+            inv_nseg = inv_nseg_nom - pseg_off
             dut_params = self._get_lvl_shift_params_dict(pinfo, pseg, nseg, inv_pseg, inv_nseg,
-                                                         inv_in_nseg, inv_in_pseg, out_inv_m,
+                                                         inv_in_pseg, inv_in_nseg, out_inv_m,
                                                          has_rst, dual_output)
             dut = await self.async_new_dut('lvshift', STDCellWrapper, dut_params)
 
@@ -540,20 +504,7 @@ class LvlShiftDesigner(DesignerBase):
                 tdr_cur, tdf_cur = CombLogicTimingTB.get_output_delay(sim_results.data, tbm.specs, 'in',
                                                                       'out', False, in_pwr='vdd_in',
                                                                       out_pwr='vdd')
-
-                '''
-                plt.figure()
-                plt.plot(sim_results.data['time'].flatten(), sim_results.data['in'].flatten(), 'b')
-                plt.plot(sim_results.data['time'].flatten(), sim_results.data['inb_buf'].flatten(), 'g')
-                plt.plot(sim_results.data['time'].flatten(), sim_results.data['in_buf'].flatten(), 'r')
-                plt.plot(sim_results.data['time'].flatten(), sim_results.data['midn'].flatten(), 'k')
-                plt.plot(sim_results.data['time'].flatten(), sim_results.data['midp'].flatten(), 'c')
-                plt.plot(sim_results.data['time'].flatten(), sim_results.data['out'].flatten(), 'm')
-                plt.legend(['in', 'inb_buf', 'in_buf', 'midn', 'midp', 'out'])
-                plt.title(f'pseg_off: {pseg_off}, pseg: {inv_pseg}, nseg: {inv_nseg-pseg_off}, fanout: {fanout}')
-                plt.show(block=False)
-                '''
-
+                print("Balance rise/fall delays inv_pup Info: ", env, tdr_cur, tdf_cur)
                 # Error checking
                 if math.isinf(np.max(tdr_cur)) or math.isinf(np.max(tdf_cur)):
                     raise ValueError("Got infinite delay!")
@@ -567,11 +518,6 @@ class LvlShiftDesigner(DesignerBase):
                     tdr = tdr_cur[0]
                     tdf = tdf_cur[0]
 
-            '''
-            print(f'iter: {inv_pseg}')
-            print(f'env: {worst_env}, tdr: {tdr}, tdf: {tdf}')
-            breakpoint()
-            '''
 
             if tdr < tdf:
                 iterator.down(tdr-tdf)
@@ -586,6 +532,7 @@ class LvlShiftDesigner(DesignerBase):
         pseg_off = iterator.get_last_save_info()
         pseg_off = 0 if pseg_off is None else pseg_off # Should only hit this case if inv_pseg_nom = 1
         inv_pseg = inv_pseg_nom + pseg_off
+        inv_nseg = inv_nseg_nom - pseg_off
 
         return inv_pseg, inv_nseg-0*pseg_off
 
@@ -597,7 +544,6 @@ class LvlShiftDesigner(DesignerBase):
         to minimize rise/fall mismatch.
         """
         tb_params = self._get_full_tb_params()
-        # Use a binary iterator to find the PMOS size
         iterator = BinaryIterator(-out_inv_m+1, out_inv_m-1)
         err_best = float('inf')
         all_corners = get_tech_global_info('bag3_digital')['signoff_envs']['all_corners']
@@ -605,7 +551,7 @@ class LvlShiftDesigner(DesignerBase):
         while iterator.has_next():
             pseg_off = iterator.get_next()
             dut_params = self._get_lvl_shift_params_dict(pinfo, pseg, nseg, inv_pseg, inv_nseg,
-                                                         inv_in_nseg, inv_in_pseg, out_inv_m,
+                                                         inv_in_pseg, inv_in_nseg, out_inv_m,
                                                          has_rst, dual_output=False, skew_out=True,
                                                          out_pseg_off=pseg_off)
             dut = await self.async_new_dut('lvshift', STDCellWrapper, dut_params)
@@ -623,7 +569,7 @@ class LvlShiftDesigner(DesignerBase):
                 tdr_cur, tdf_cur = CombLogicTimingTB.get_output_delay(sim_results.data, tbm.specs, 'in',
                                                                       'out', False, in_pwr='vdd_in',
                                                                       out_pwr='vdd')
-
+                print('Info from simulation Output driver : ', env, tdr_cur, tdf_cur)
                 if math.isinf(np.max(tdr_cur)) or math.isinf(np.max(tdf_cur)):
                     raise ValueError("Got infinite delay!")
                 if tdr_cur[0] < 0 or tdf_cur[0] < 0:
@@ -637,11 +583,6 @@ class LvlShiftDesigner(DesignerBase):
                     tdf = tdf_cur[0]
                     sim_worst = sim_results
 
-            '''
-            print(f'iter: {pseg_off}')
-            print(f'env: {worst_env}, tdr: {tdr}, tdf: {tdf}')
-            breakpoint()
-            '''
 
             if tdr < tdf:
                 iterator.down(tdr - tdf)
@@ -711,19 +652,20 @@ class LvlShiftDesigner(DesignerBase):
         seg_inv : Inb_buf to In_buf inverter segments
         seg_in_inv : In to Inb_buf inverter segments
         pinfo : pinfo
-        # TODO: UPDATE THIS DOCUMENTATION
         Note: This will let the width be passed through the pinfo, currently no rst
         """
         tech_info = get_tech_global_info('bag3_digital')
         wn = tech_info['w_minn'] if is_ctrl else 2*tech_info['w_minn']
         wp = tech_info['w_minp'] if is_ctrl else 2*tech_info['w_minp']
 
+        beta = get_tech_global_info('bag3_digital')['inv_beta']
+
         if has_rst:
             seg_dict = dict(pd=seg_n, pu=seg_p, rst=int(np.ceil(seg_n/2)), prst=seg_p)
-            w_dict = dict(pd=wn, pu=wp, rst=wn)
+            w_dict = dict(pd=wn, pu=wp, rst=wn, invp=wp, invn=wn)
         else:
             seg_dict = dict(pd=seg_n, pu=seg_p)
-            w_dict = dict(pd=wn, pu=wp)
+            w_dict = dict(pd=wn, pu=wp, invp=wp, invn=wn)
 
         lv_params = dict(
             cls_name=LevelShifter.get_qualified_name(),
@@ -740,7 +682,7 @@ class LvlShiftDesigner(DesignerBase):
                 ),
                 in_buf_params=dict(segp_list=[seg_in_inv_p, seg_inv_p],
                                    segn_list=[seg_in_inv_n, seg_inv_n],
-                                   w_p=wp, w_n=wn),
+                                   w_p=wp, w_n=wn, sep_stages=True),
                 export_pins=True,
             )
         )
@@ -751,10 +693,12 @@ class LvlShiftDesigner(DesignerBase):
             lv_params['params']['lv_params']['stack_p'] = 2
 
         if skew_out:
-            lv_params['params']['lv_params']['buf_segn_list'] = [out_inv_m]
-            lv_params['params']['lv_params']['buf_segp_list'] = [out_inv_m + out_pseg_off]
+            lv_params['params']['lv_params']['buf_segn_list'] = [out_inv_m - out_pseg_off]
+            lv_params['params']['lv_params']['buf_segp_list'] = [out_inv_m * beta + out_pseg_off]
         else:
-            lv_params['params']['lv_params']['buf_seg_list'] = [out_inv_m]
+            #lv_params['params']['lv_params']['buf_seg_list'] = [out_inv_m]
+            lv_params['params']['lv_params']['buf_segn_list'] = [out_inv_m]
+            lv_params['params']['lv_params']['buf_segp_list'] = [out_inv_m * beta]
 
         return lv_params
 

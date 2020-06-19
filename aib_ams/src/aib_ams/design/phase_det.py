@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2019 Blue Cheetah Analog Design Inc.
+# Copyright 2020 Blue Cheetah Analog Design Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 
 """This package contains design class for PhaseDetector"""
 
-from typing import Dict, Any, Tuple, List, Mapping, Sequence
+from typing import Dict, Any, Tuple, List, Mapping, Sequence, Optional
 
 import pprint
 from pathlib import Path
@@ -37,6 +37,9 @@ from bag3_digital.measurement.cap.delay_match import CapDelayMatch
 from aib_ams.design.se_to_diff_en import SingleToDiffDesigner
 from aib_ams.layout.phase_det import PhaseDetector
 from aib_ams.measurement.phase_det import PhaseDetMeasManager
+
+from bag3_digital.layout.stdcells.util import STDCellWrapper
+
 
 
 class PhaseDetectorDesigner(DigitalDesigner):
@@ -145,7 +148,7 @@ class PhaseDetectorDesigner(DigitalDesigner):
                            flop_params: Mapping[str, Any], cin_params: Mapping[str, Any], meas_specs: Mapping[str, Any],
                            sign_off_envs: Sequence[str], vm_pitch: float, tile_se_to_diff: str, tile_dummy: str,
                            tiles_flop: Sequence[Mapping[str, Any]], tiles_phasedet: Sequence[Mapping[str, Any]],
-                           tile_specs: Mapping[str, Any]) -> Mapping[str, Any]:
+                           tile_specs: Mapping[str, Any], **kwargs: Mapping[str, Any]) -> Mapping[str, Any]:
         """
         Passed in kwargs are the same as self.dsn_specs
 
@@ -215,7 +218,21 @@ class PhaseDetectorDesigner(DigitalDesigner):
                 inv_params=inv_params
             )
         )
+
+        gen_specs: Optional[Mapping[str, Any]] = kwargs.get('gen_cell_specs', None)
+        gen_cell_args: Optional[Mapping[str, Any]] = kwargs.get('gen_cell_args', None)
+
         results = await self.verify_design(dut_params)
+
+        if gen_specs is not None and gen_cell_args is not None:
+            gen_cell_specs = dict(
+                lay_class=STDCellWrapper.get_qualified_name(),
+                cls_name=PhaseDetector.get_qualified_name(),
+                params=dut_params,
+                **gen_specs,
+            )
+            return dict(gen_specs=gen_cell_specs, gen_args=gen_cell_args)
+
         return dict(inv_params=inv_params, c_flop=c_in + c_clk_rise, results=results)
 
     async def get_inv_params(self, clk_rise: float) -> Tuple[Mapping[str, Any], float, float]:

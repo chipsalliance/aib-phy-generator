@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2019 Blue Cheetah Analog Design Inc.
+# Copyright 2020 Blue Cheetah Analog Design Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -127,7 +127,7 @@ class PhaseInterpDesigner(DesignerBase):
                      dict(pin='co_p', type='cap', value='c_out')]
         gen_params = dict(
             cls_name=DelayCellCore.get_qualified_name(),
-            params=dict(pinfo=pinfo, **delay_cell_params)
+            params=dict(pinfo=pinfo, stand_alone=True, **delay_cell_params)
         )
         dc_in_cap = await self._get_input_cap(gen_params, 'ci_p', cload, cin_dut_conns, pwr_domains,
                                               load_list, vdd=dsn_env_vdds['tt_25'],

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2019 Blue Cheetah Analog Design Inc.
+# Copyright 2020 Blue Cheetah Analog Design Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,6 +32,8 @@ from bag.concurrent.util import GatherHelper
 from bag3_testbenches.measurement.tran.digital import DigitalTranTB
 from bag3_testbenches.measurement.data.tran import EdgeType
 from bag3_digital.layout.stdcells.util import STDCellWrapper
+from bag.layout.util import IPMarginTemplate
+from xbase.layout.mos.top import GenericWrapper
 from aib_ams.layout.delay_line import DelayLine
 
 from bag.env import get_tech_global_info
@@ -130,6 +132,10 @@ class DelayLineDesigner(DesignerBase):
         curr_stack = 1
         num_core = kwargs.get('num_core', 1)
 
+        plot_result: bool = kwargs.get('plot_result', False)
+        gen_specs: Optional[Mapping[str, Any]] = kwargs.get('gen_cell_specs', None)
+        gen_cell_args: Optional[Mapping[str, Any]] = kwargs.get('gen_cell_args', None)
+
         cur_tmax, cur_tmin = float('inf'), -float('inf')
         while cur_tmax > tmax or cur_tmin < tmin:
             # Accomplish max delay by sweeping outer_nand_nseg from current to max possible
@@ -147,6 +153,8 @@ class DelayLineDesigner(DesignerBase):
                                                                        pinfo,
                                                                        sim_params)
                     self.log(f'cur_tmax = {cur_tmax}, wanted_tmax < {tmax}')
+                    # await self.plot_results(curr_nand_outer_seg, curr_nand_inner_seg, curr_stack, ncodes, cload, num_core,
+                    #     nrows, ncols, pinfo, sim_params)
                     if cur_tmax < tmax:
                         self.log(f'nand_out_seg = {curr_nand_outer_seg} worked')
                         break
@@ -170,6 +178,9 @@ class DelayLineDesigner(DesignerBase):
                                                                        pinfo,
                                                                        sim_params)
                     self.log(f'cur_tmin = {cur_tmin}, wanted_tmin > {tmin}')
+                    # await self.plot_results(curr_nand_outer_seg, curr_nand_inner_seg, curr_stack, ncodes, cload,
+                    #                         num_core,
+                    #                         nrows, ncols, pinfo, sim_params)
                     if cur_tmin > tmin:
                         self.log('done with tmin using stack')
                         break
@@ -189,6 +200,9 @@ class DelayLineDesigner(DesignerBase):
                                                                            pinfo,
                                                                            sim_params)
                         self.log(f'cur_tmin = {cur_tmin}, wanted_tmin > {tmin}')
+                        # await self.plot_results(curr_nand_outer_seg, curr_nand_inner_seg, curr_stack, ncodes, cload,
+                        #                         num_core,
+                        #                         nrows, ncols, pinfo, sim_params)
                         if cur_tmin > tmin:
                             break
                     else:
@@ -200,14 +214,140 @@ class DelayLineDesigner(DesignerBase):
                 curr_nand_outer_seg, curr_nand_inner_seg, curr_stack, cload, std_delay, num_core,
                 pinfo, sim_params, mc_dsn_env, mc_params, ncodes=3)
 
+        if plot_result:
+            results = await self._measure_times(
+                curr_nand_outer_seg, curr_nand_inner_seg, curr_stack, ncodes, cload, num_core,
+                nrows, ncols, pinfo, sim_params
+            )
+            td_min = results['td_min']
+            td_max = results['td_max']
+            # results:
+            # return tdr_arr, tdf_arr, tdr_per_code, tdf_per_code
+            dsn_env_names = sim_params['sim_envs']
+            from matplotlib import pyplot as plt
+            plt.figure(1)
+            ax: Any = plt.subplot(2, 1, 1)
+            xvec = np.arange(0, ncodes / 2 - 1)
+            for idx, sim_env in enumerate(dsn_env_names):
+                tdr = results['tdr_arr'][idx, :-1]
+                tdr = tdr[..., ::2].flatten()
+                plt.step(xvec, tdr, where='mid', label=sim_env)
+            ax.legend()
+            ax.set_ylabel('Rise Delay (s)')
+            ax = plt.subplot(2, 1, 2)
+            for idx, sim_env in enumerate(dsn_env_names):
+                tdr_step = results['tdr_per_code'][idx, :].flatten()
+                ax.scatter(xvec, tdr_step, label=sim_env)
+            ax.set_ylim(ymin=td_min, ymax=td_max)
+            ax.legend()
+            ax.set_ylabel('Rise Delay Step (s)')
+            ax.set_xlabel('Code')
+            plt.show()
+
         summary = dict(
             nand_outer_seg=curr_nand_outer_seg,
             nand_inner_seg=curr_nand_inner_seg,
             stack=curr_stack,
             num_insts=ncodes,
         )
+        if gen_specs is not None and gen_cell_args is not None:
+            dut_params = self._get_dut_params(curr_nand_outer_seg, curr_nand_inner_seg, curr_stack, ncodes, num_core,
+                                              nrows, ncols, pinfo)
+            # dut_params['params']['draw_taps'] = 'LEFT'
+            gen_cell_specs = dict(
+                lay_class=STDCellWrapper.get_qualified_name(),
+                cls_name=DelayLine.get_qualified_name(),
+                params=dut_params,
+                **gen_specs,
+            )
+            return dict(gen_specs=gen_cell_specs, gen_args=gen_cell_args)
 
         return summary
+
+    async def plot_results(self, curr_nand_outer_seg, curr_nand_inner_seg, curr_stack, ncodes, cload, num_core,
+                           nrows, ncols, pinfo, sim_params):
+        results = await self._measure_times(
+            curr_nand_outer_seg, curr_nand_inner_seg, curr_stack, ncodes, cload, num_core,
+            nrows, ncols, pinfo, sim_params
+        )
+        td_min = results['td_min']
+        td_max = results['td_max']
+        # results:
+        # return tdr_arr, tdf_arr, tdr_per_code, tdf_per_code
+        dsn_env_names = sim_params['sim_envs']
+        from matplotlib import pyplot as plt
+        plt.figure(1)
+        ax: Any = plt.subplot(2, 1, 1)
+        xvec = np.arange(0, ncodes / 2 - 1)
+        for idx, sim_env in enumerate(dsn_env_names):
+            tdr = results['tdr_arr'][idx, :-1]
+            tdr = tdr[..., ::2].flatten()
+            plt.step(xvec, tdr, where='mid', label=sim_env)
+        ax.legend()
+        ax.set_ylabel('Rise Delay (s)')
+        ax = plt.subplot(2, 1, 2)
+        for idx, sim_env in enumerate(dsn_env_names):
+            tdr_step = results['tdr_per_code'][idx, :].flatten()
+            ax.scatter(xvec, tdr_step, label=sim_env)
+        ax.set_ylim(ymin=td_min, ymax=td_max)
+        ax.legend()
+        ax.set_ylabel('Rise Delay Step (s)')
+        ax.set_xlabel('Code')
+        plt.show()
+
+    async def _measure_times(self,
+                             nand_outer_seg: int,
+                             nand_inner_seg: int,
+                             stack: int,
+                             ncodes: int,
+                             cload: float,
+                             num_core: int,
+                             nrows: int,
+                             ncols: int,
+                             pinfo: Mapping[str, Any],
+                             sim_params: Mapping[str, Any]):
+        dut_params = self._get_dut_params(nand_outer_seg, nand_inner_seg, stack, ncodes, num_core,
+                                          nrows, ncols, pinfo)
+        dut = await self.async_new_dut('dly_line_chain', STDCellWrapper, dut_params)
+
+
+
+        tper = sim_params['tper']
+        ncycles = sim_params['ncycles']
+        sim_id_pref = f'dly_no{nand_outer_seg}_ni{nand_inner_seg}_s{stack}'
+        helper = GatherHelper()
+        for code in range(0, ncodes - 1):
+            tbm_params = self._get_tbm_params(code, ncodes, cload, sim_params)
+            sim_id = f'{sim_id_pref}_c{code}'
+            helper.append(self._get_delay(sim_id, dut, tbm_params, t_start=tper * (ncycles - 1),
+                                          t_stop=tper * ncycles))
+        ret_list = await helper.gather_err()
+        tdr_list, tdf_list = [x[0] for x in ret_list], [x[1] for x in ret_list]
+
+        res_arr = dict()
+
+        tdr_arr = np.stack(tdr_list, axis=-1)
+        res_arr['tdr_arr'] = tdr_arr
+        tdf_arr = np.stack(tdf_list, axis=-1)
+        res_arr['tdf_arr'] = tdf_arr
+        tdr_per_code = np.diff(tdr_arr, axis=-1)[..., ::2]
+        res_arr['tdr_per_code'] = tdr_per_code
+        tdf_per_code = np.diff(tdf_arr, axis=-1)[..., ::2]
+        res_arr['tdf_per_code'] = tdf_per_code
+
+        tdr_max = np.max(tdr_per_code)
+        res_arr['tdr_max'] = tdr_max
+        tdf_max = np.max(tdf_per_code)
+        res_arr['tdf_max'] = tdf_max
+        tdr_min = np.min(tdr_per_code)
+        res_arr['tdr_min'] = tdr_min
+        tdf_min = np.min(tdf_per_code)
+        res_arr['tdf_min'] = tdf_min
+
+        res_arr['td_max'] = max(tdr_max, tdf_max)
+        res_arr['td_min'] = min(tdr_min, tdf_min)
+
+        return res_arr
 
     async def _design_chain_step(self,
                                  nand_outer_seg: int,
@@ -223,7 +363,8 @@ class DelayLineDesigner(DesignerBase):
         mid = ncodes // 2
         dut_params = self._get_dut_params(nand_outer_seg, nand_inner_seg, stack, ncodes, num_core,
                                           nrows, ncols, pinfo)
-        dut = await self.async_new_dut('dly_line_chain', STDCellWrapper, dut_params)
+        # dut = await self.async_new_dut('dly_line_chain', STDCellWrapper, dut_params)
+        dut = await self.async_new_dut('dly_line_chain', GenericWrapper, dut_params)
 
         tper = sim_params['tper']
         ncycles = sim_params['ncycles']
@@ -357,7 +498,6 @@ class DelayLineDesigner(DesignerBase):
             'out': tech_info['seg_min'],
         }
 
-        # TODO: Figure out num_rows/cols based on ncodes and some other sizing related input specs
         dut_params = dict(
             cls_name=self.get_dut_lay_class().get_qualified_name(),
             params=dict(
@@ -366,12 +506,15 @@ class DelayLineDesigner(DesignerBase):
                     dc_core=dc_core,
                     scan_rst_flop=scan_rst_flop,
                     so_inv=tech_info['seg_min'],
+                    bk_inv=tech_info['seg_min'],
                 ),
                 stack_nand=stack,
                 num_rows=nrows,
                 num_cols=ncols,
                 num_insts=ncodes,
                 num_core=num_core,
+                flop=False,
+
                 tile0=1,
                 tile1=3,
                 tile_vss=0,

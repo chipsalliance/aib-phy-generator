@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2019 Blue Cheetah Analog Design Inc.
+# Copyright 2020 Blue Cheetah Analog Design Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 from typing import Any, Union, Tuple, Mapping, List, Optional, Dict, Sequence, Type, cast
 
 from pathlib import Path
+from itertools import chain
 
 import numpy as np
 
@@ -137,26 +138,35 @@ class LibertyCharMM(MeasurementManager):
 
         # setup input capacitance measurements
         ans = {}
-        out_io_pins = []
-        gatherer = GatherHelper()
-        for pin_name, term_type in dut.sch_master.pins.items():
-            basename, bus_range = parse_cdba_name(pin_name)
-            if bus_range is None:
-                ans[pin_name] = pin_info = {}
-                if term_type is TermType.input:
-                    gatherer.append(self._measure_in_cap(name, sim_dir, sim_db, dut, pin_name,
-                                                         in_cap_table, pin_info))
-                else:
-                    out_io_pins.append(pin_name)
-            else:
-                for bus_idx in bus_range:
-                    bit_name = get_bus_bit_name(basename, bus_idx, cdba=True)
-                    ans[bit_name] = pin_info = {}
+        if dut is None:
+            in_pin_list: Sequence[Mapping[str, Any]] = specs['in_pin_list']
+            out_pin_list: Sequence[Mapping[str, Any]] = specs['out_pin_list']
+            io_pin_list: Sequence[Mapping[str, Any]] = specs['io_pin_list']
+            in_bit_names = [info['name'] for info in in_pin_list]
+            out_io_pins = [info['name'] for info in chain(out_pin_list, io_pin_list)]
+        else:
+            in_bit_names = []
+            out_io_pins = []
+            for pin_name, term_type in dut.sch_master.pins.items():
+                basename, bus_range = parse_cdba_name(pin_name)
+                if bus_range is None:
                     if term_type is TermType.input:
-                        gatherer.append(self._measure_in_cap(name, sim_dir, sim_db, dut,
-                                                             bit_name, in_cap_table, pin_info))
+                        in_bit_names.append(pin_name)
                     else:
-                        out_io_pins.append(bit_name)
+                        out_io_pins.append(pin_name)
+                else:
+                    for bus_idx in bus_range:
+                        bit_name = get_bus_bit_name(basename, bus_idx, cdba=True)
+                        if term_type is TermType.input:
+                            in_bit_names.append(bit_name)
+                        else:
+                            out_io_pins.append(bit_name)
+
+        gatherer = GatherHelper()
+        for bit_name in in_bit_names:
+            ans[bit_name] = pin_info = {}
+            gatherer.append(self._measure_in_cap(name, sim_dir, sim_db, dut, bit_name,
+                                                 in_cap_table, pin_info))
 
         # record input capacitances
         if gatherer:
@@ -168,6 +178,7 @@ class LibertyCharMM(MeasurementManager):
         # compute inout and output pin cap/timing information
         gatherer.clear()
         for bit_name in out_io_pins:
+            ans[bit_name] = pin_info = {}
             pin_info = out_io_info_table.get(bit_name, None)
             if pin_info is None:
                 continue

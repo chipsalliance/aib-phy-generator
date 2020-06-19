@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2019 Blue Cheetah Analog Design Inc.
+# Copyright 2020 Blue Cheetah Analog Design Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -68,6 +68,7 @@ class LevelShifterCore(MOSBase):
             has_rst='True to enable reset pins.',
             stack_p='PMOS number of stacks.',
             sig_locs='Optional dictionary of user defined signal locations',
+            rst_b_wire_idx='Optional parameter to move the horizontal wire for reset connections',
         )
 
     @classmethod
@@ -83,6 +84,7 @@ class LevelShifterCore(MOSBase):
             has_rst=True,
             stack_p=1,
             sig_locs={},
+            rst_b_wire_idx=2,
         )
 
     def draw_layout(self):
@@ -103,6 +105,8 @@ class LevelShifterCore(MOSBase):
         has_rst: bool = params['has_rst']
         stack_p: int = params['stack_p']
         sig_locs: Mapping[str, Union[float, HalfInt]] = params['sig_locs']
+        rst_b_wire_idx: int = params['rst_b_wire_idx']
+        # breakpoint()
 
         if stack_p != 1 and stack_p != 2:
             raise ValueError('Only support stack_p = 1 or stack_p = 2')
@@ -161,7 +165,6 @@ class LevelShifterCore(MOSBase):
 
             if stack_p == 2:
                 if pmos_fg > nmos_fg:
-                    # TODO: remove lazy hack
                     raise ValueError('pmos reset placement code will break in this case')
             num_core_col = max(nmos_col, pmos_col)
         else:
@@ -202,8 +205,8 @@ class LevelShifterCore(MOSBase):
                     raise ValueError('seg_prst cannot be 0')
                 prst_sep = min_sep_odd + ((min_sep_odd & 1) ^ ((seg_prst & 1) == 0))
                 prst_delta = mid_sep2 + pmos_fg + prst_sep + seg_prst
-                prst_l = self.add_mos(ridx_p, col_mid - prst_delta, seg_prst, w=w_pu)
-                prst_r = self.add_mos(ridx_p, col_mid + prst_delta, seg_prst, w=w_pu, flip_lr=True)
+                prst_l = self.add_mos(ridx_p, col_mid - prst_delta, seg_prst, w=w_rst)
+                prst_r = self.add_mos(ridx_p, col_mid + prst_delta, seg_prst, w=w_rst, flip_lr=True)
             else:
                 prst_l = prst_r = None
         else:
@@ -282,15 +285,15 @@ class LevelShifterCore(MOSBase):
                     rst_midr_b = in_r.g1
 
                 # connect rst gates
-                rst_b_tidx = self.get_track_index(ridx_n, MOSWireType.G, 'sig',  wire_idx=2)
+                rst_b_tidx = self.get_track_index(ridx_n, MOSWireType.G, 'sig',  wire_idx=rst_b_wire_idx)
                 rst_b_tidx = sig_locs.get('rst_casc', rst_b_tidx)
                 rst_b_tid = TrackID(hm_layer, rst_b_tidx, width=sig_w_hm)
                 if rst_tid is None:
                     rst_tid = rst_b_tid
+                # breakpoint()
 
                 rst_b_wires = [rst_midl_b, rst_midr_b]
                 if prst_l is not None:
-                    # TODO: check for line-end spacing errors, rst_b_tid may not be a good track.
                     rst_b_wires.append(prst_l.g)
                     rst_b_wires.append(prst_r.g)
 
@@ -440,7 +443,8 @@ class LevelShifterCoreOutBuffer(MOSBase):
             stack_p='PMOS number of stacks.',
             sig_locs='Optional dictionary of user defined signal locations',
             num_col_tot='Total number of columns.',
-            export_pins='Defaults to False.  True to export simulation pins.'
+            export_pins='Defaults to False.  True to export simulation pins.',
+            rst_b_wire_idx='Wire index for the reset signal',
         )
 
     @classmethod
@@ -463,6 +467,7 @@ class LevelShifterCoreOutBuffer(MOSBase):
             sig_locs={},
             num_col_tot=0,
             export_pins=False,
+            rst_b_wire_idx=2,
         )
 
     def draw_layout(self):
@@ -488,6 +493,7 @@ class LevelShifterCoreOutBuffer(MOSBase):
         sig_locs: Mapping[str, Union[float, HalfInt]] = params['sig_locs']
         num_col_tot: int = params['num_col_tot']
         export_pins: bool = params['export_pins']
+        rst_b_wire_idx: int = params['rst_b_wire_idx']
 
         hm_layer = self.conn_layer + 1
         vm_layer = hm_layer + 1
@@ -527,6 +533,7 @@ class LevelShifterCoreOutBuffer(MOSBase):
             stack_p=stack_p,
             inp_on_right=invert_in,
             sig_locs=sig_locs,
+            rst_b_wire_idx=rst_b_wire_idx,
         )
         core_master: LevelShifterCore = self.new_template(LevelShifterCore, params=core_params)
         self._mid_vertical = core_master.out_vertical
@@ -571,6 +578,7 @@ class LevelShifterCoreOutBuffer(MOSBase):
         )
         invr_master = self.new_template(InvChainCore, params=invr_params)
         sch_buf_params = invr_master.sch_params.copy(remove=['dual_output'])
+
 
         # place instances
         inv_sep = self.min_sep_col
@@ -764,12 +772,14 @@ class LevelShifter(MOSBase):
         # make sure supply on even number
         buf_idx += (buf_idx & 1)
         buf = self.add_tile(buf_master, 0, buf_idx, flip_lr=True)
-        self.set_mos_size(num_cols=max(buf_idx, lv_master.num_cols))
+        num_cols_tot = max(buf_idx, lv_master.num_cols)
+        self.set_mos_size(num_cols=num_cols_tot)
 
         # connect wires
         self.add_pin('VSS', self.connect_wires([lv.get_pin('VSS'), buf.get_pin('VSS')]))
         self.connect_differential_wires(buf.get_pin('out'), buf.get_pin('outb'),
                                         lv.get_pin('in'), lv.get_pin('inb'))
+        # breakpoint()
 
         # reexport pins
         self.reexport(buf.get_port('VDD'), net_name='VDD_in')

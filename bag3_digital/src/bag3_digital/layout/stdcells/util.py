@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2019 Blue Cheetah Analog Design Inc.
+# Copyright 2020 Blue Cheetah Analog Design Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -70,6 +70,7 @@ class STDCellWithTap(MOSBase):
         tap_sep_col = self.sub_sep_col
         num_cols = master.num_cols + 2 * (tap_sep_col + tap_ncol)
         self.set_mos_size(num_cols, num_tiles=num_tiles)
+        # breakpoint()
 
         if not pwr_gnd_list:
             pwr_gnd_list = [('VDD', 'VSS')] * num_tiles

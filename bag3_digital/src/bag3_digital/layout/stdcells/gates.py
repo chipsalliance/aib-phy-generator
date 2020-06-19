@@ -27,7 +27,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# Copyright 2019 Blue Cheetah Analog Design Inc.
+# Copyright 2020 Blue Cheetah Analog Design Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -550,8 +550,8 @@ class InvChainCore(MOSBase):
                 seg_n=segn,
                 stack_p=stack,
                 stack_n=stack,
-                wp=w_p,
-                wn=w_n,
+                w_p=wp,
+                w_n=wn,
                 ridx_p=ridx_p,
                 ridx_n=ridx_n,
                 is_guarded=is_guarded,
@@ -651,6 +651,11 @@ class InvTristateCore(MOSBase):
         vertical_out: bool = self.params['vertical_out']
         vertical_sup: bool = self.params['vertical_sup']
 
+        if w_p == 0:
+            w_p = self.place_info.get_row_place_info(ridx_p).row_info.width
+        if w_n == 0:
+            w_n = self.place_info.get_row_place_info(ridx_n).row_info.width
+
         hm_layer = self.conn_layer + 1
         vm_layer = hm_layer + 1
         if vertical_out and self.top_layer < vm_layer:
@@ -723,14 +728,13 @@ class InvTristateCore(MOSBase):
 
         self.add_pin('pout', pout, label='out:', hide=vertical_out)
         self.add_pin('nout', nout, label='out:', hide=vertical_out)
-
         # set properties
         self.sch_params = dict(
             seg_p=seg_p,
             seg_n=seg_n,
             lch=self.place_info.lch,
-            w_n=self.place_info.get_row_place_info(ridx_n).row_info.width if w_n == 0 else w_n,
-            w_p=self.place_info.get_row_place_info(ridx_p).row_info.width if w_p == 0 else w_p,
+            w_n=w_n,
+            w_p=w_p,
             th_n=self.place_info.get_row_place_info(ridx_n).row_info.threshold,
             th_p=self.place_info.get_row_place_info(ridx_p).row_info.threshold,
             stack_p=stack_p,

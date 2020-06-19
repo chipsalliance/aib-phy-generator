@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2019 Blue Cheetah Analog Design Inc.
+# Copyright 2020 Blue Cheetah Analog Design Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -74,6 +74,9 @@ class DelayCellCore(MOSBase):
             stack_nand='Number of stacks in NAND gates of DelayCellCore',
             feedback='True to connect ci_p and co_p',
             output_sr_pins='True to output measurement pins.',
+            stand_alone=('True to make this block LVS clean by itself.  '
+                         'Used only if substrate_row is True, and this will add an '
+                         'extra substrate row.'),
         )
 
     @classmethod
@@ -92,6 +95,7 @@ class DelayCellCore(MOSBase):
             stack_nand=1,
             feedback=False,
             output_sr_pins=False,
+            stand_alone=False,
         )
 
     def draw_layout(self):
@@ -112,6 +116,7 @@ class DelayCellCore(MOSBase):
         stack_nand: int = self.params['stack_nand']
         feedback: bool = self.params['feedback']
         output_sr_pins: bool = self.params['output_sr_pins']
+        stand_alone: bool = self.params['stand_alone']
 
         if feedback and not vertical_out:
             raise ValueError('cannot connect ci_pand co_p if vertical_out=False')
@@ -150,7 +155,7 @@ class DelayCellCore(MOSBase):
         sr1_in1_idx = ng1 if bk_idx == pg1 else pg1
         nand_in_params = dict(
             seg=seg_dict['in'],
-            sig_locs={'nout': nd0, 'pout': pd1, 'nin0': pg0, 'nin1': bk_idx},
+            sig_locs={'nin0': pg0, 'nin1': bk_idx},
             vertical_out=False,
             **nand_params,
         )
@@ -158,7 +163,7 @@ class DelayCellCore(MOSBase):
 
         nand_out_params = dict(
             seg=seg_dict['out'],
-            sig_locs={'nout': nd0, 'pout': pd1},
+            sig_locs={},
             vertical_out=False,
             **nand_params,
         )
@@ -166,7 +171,7 @@ class DelayCellCore(MOSBase):
 
         nand_sr0_params = dict(
             seg=seg_dict['sr'],
-            sig_locs={'nin0': pg1, 'nin1': ng1},
+            sig_locs={'nin0': pg1, 'nin1': ng1, 'nout': nd0, 'pout': pd1},
             vertical_out=False,
             **nand_params,
         )
@@ -174,7 +179,7 @@ class DelayCellCore(MOSBase):
 
         nand_sr1_params = dict(
             seg=seg_dict['sr'],
-            sig_locs={'nin0': pg0, 'nin1': sr1_in1_idx},
+            sig_locs={'nin0': pg0, 'nin1': sr1_in1_idx, 'nout': nd0, 'pout': pd1},
             vertical_out=False,
             **nand_params,
         )
@@ -197,13 +202,17 @@ class DelayCellCore(MOSBase):
         # 3. place sr NANDs
         tr_w_h = tr_manager.get_width(hm_layer, 'sig')
         sep = max(self.min_sep_col, self.get_hm_sp_le_sep_col(tr_w_h))
+        sep += sep & 1
         cur_col += max(nand_out_master.num_cols, nand_in_master.num_cols) + sep
         nand_sr0_inst = self.add_tile(nand_sr0_master, tile0, cur_col)
         nand_sr1_inst = self.add_tile(nand_sr1_master, tile1, cur_col)
 
         # 4. set size
         cur_col += max(nand_sr0_master.num_cols, nand_sr1_master.num_cols) + r_offset
-        self.set_mos_size(cur_col)
+        if stand_alone and substrate_row:
+            self.set_mos_size(num_cols=cur_col, num_tiles=self.num_tile_rows + 1)
+        else:
+            self.set_mos_size(cur_col)
 
         # 5. add taps
         tap_vdd_list, tap_vss_list = [], []

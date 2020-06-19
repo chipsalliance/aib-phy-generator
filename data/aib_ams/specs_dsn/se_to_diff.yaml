@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2019 Blue Cheetah Analog Design Inc.
+# Copyright 2020 Blue Cheetah Analog Design Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,6 +19,16 @@ impl_lib: AAA_DSN_SE2DIFF
 precision: 8
 
 dsn_params:
+  gen_cell_specs:
+    impl_lib: AAA_DSN_SE2DIFF_FINAL
+    impl_cell: aib_se2diff_final
+    root_dir: gen_outputs/dsn_se_to_diff_final
+  gen_cell_args:
+    gen_lay: True
+    gen_sch: True
+    gen_model: True
+    run_lvs: True
+    gen_lef: True
   inv_char_params:
     seg: 4
     w_p: 4

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2019 Blue Cheetah Analog Design Inc.
+# Copyright 2020 Blue Cheetah Analog Design Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,9 +18,20 @@ impl_lib: AAA_DSN_RXANALOG
 root_dir: gen_outputs/dsn_rxanlg
 
 dsn_params:
+  gen_cell_specs:
+    impl_lib: AAA_DSN_RXANALOG
+    impl_cell: aib_rxanlg
+    root_dir: gen_outputs/dsn_rxanlg
+  gen_cell_args:
+    gen_lay: True
+    gen_sch: True
+    gen_model: True
+    run_lvs: True
+    gen_lef: True
   data_lv_specs:
     lv_params:
       seg_prst: 2
+      rst_b_wire_idx: 3
 
     fanout_inv: 1.5
     fanout_core: 6.0
@@ -29,6 +40,7 @@ dsn_params:
     rst_ratio: 0.5
     w_p_inv: 4
     w_n_inv: 4
+
 
   se_en_specs:
     se_to_diff_specs:
@@ -83,6 +95,7 @@ dsn_params:
     vout: 'vddio'
     w_p: 4
     w_n: 4
+    rst_b_wire_idx: 3
 
   por_lv_specs:
     fanout_inv: 10.0
@@ -92,6 +105,7 @@ dsn_params:
     rst_ratio: 0.5
     w_p_inv: 4
     w_n_inv: 4
+    rst_b_wire_idx: 3
 
   c_load: 4.0e-15
   c_odat_async: 8.0e-15
@@ -168,19 +182,19 @@ dsn_params:
             threshold: lvt
             bot_wires:
               data:
-                - wires: ['sup', 'sig<0:2>']
+                - wires: ['sup', 'sig<0:3>']
                 - wires: ['sig<0>', 'padout']
               shared: [sup]
-            top_wires: ['sig<0:2>']
+            top_wires: ['sig<0:3>']
             flip: True
           - mos_type: pch
             width: 4
             threshold: lvt
             top_wires:
               data:
-                - wires: ['sig<0:2>', 'sup']
-                - wires: ['padout', 'sig<2>']
+                - wires: ['sig<0:3>', 'sup']
+                - wires: ['padout', 'sig<3>']
               shared: [sup]
-            bot_wires: ['sig<0:2>']
+            bot_wires: ['sig<0:3>']
 
     abut_list: []

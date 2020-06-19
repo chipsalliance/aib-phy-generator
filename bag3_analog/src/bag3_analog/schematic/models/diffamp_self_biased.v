@@ -12,6 +12,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# bag3_digital
+{{ _header }}
 
-repo of digital generators for BAG3.
+parameter DELAY = {{ delay | default(0, true) }};
+logic temp;
+
+always_comb begin
+    casez ({v_inp, v_inn, VDD, VSS})
+        4'b1010: temp = 1'b1;
+        4'b0110: temp = 1'b0;
+        4'b??00: temp = 1'b0;
+        default: temp = 1'bx;
+    endcase
+end
+
+assign #DELAY v_out = temp;
+
+endmodule

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2019 Blue Cheetah Analog Design Inc.
+# Copyright 2020 Blue Cheetah Analog Design Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ from ...layout.stdcells.gates import InvCore, PassGateCore
 from ...layout.stdcells.se_to_diff import SingleToDiff
 from ...measurement.stdcells.passgate.delay import PassGateRCDelayCharMM
 from ..base import DigitalDesigner, BinSearchSegWidth
+from ...layout.stdcells.util import STDCellWrapper
 
 
 class RCData:
@@ -202,7 +203,10 @@ class SingleToDiffDesigner(DigitalDesigner):
         )
 
         w_max = self._pinfo.get_row_place_info(ridx_n).row_info.width
-        self._w_arr = np.arange(w_min, w_max + 1, w_res)
+        if 'w_arr' in specs:
+            self._w_arr = np.array(specs['w_arr'])
+        else:
+            self._w_arr = np.arange(w_min, w_max + 1, w_res)
         self._beta = (inv_char_params['w_p'] / inv_char_params['w_n'],
                       pg_char_params['w_p'] / pg_char_params['w_n'])
 
@@ -219,6 +223,10 @@ class SingleToDiffDesigner(DigitalDesigner):
         max_iter: int = specs['max_iter']
         err_targ_inv2_inv4: float = specs['err_targ_inv2_inv4']
         err_targ_total: float = specs['err_targ_total']
+
+
+        gen_specs: Optional[Mapping[str, Any]] = kwargs.get('gen_cell_specs', None)
+        gen_cell_args: Optional[Mapping[str, Any]] = kwargs.get('gen_cell_args', None)
 
         # get initial sizing
         rc_data, se_params = await self.get_init_sizing()
@@ -255,6 +263,17 @@ class SingleToDiffDesigner(DigitalDesigner):
 
         c_in = await self.get_cin(se_params, rc_data)
         td_table = await self.sign_off(se_params)
+
+        if gen_specs is not None and gen_cell_args is not None:
+            gen_cell_specs = dict(
+                lay_class=STDCellWrapper.get_qualified_name(),
+                params=dict(
+                    cls_name=SingleToDiff.get_qualified_name(),
+                    params=se_params,
+                ),
+                **gen_specs,
+            )
+            return dict(gen_specs=gen_cell_specs, gen_args=gen_cell_args)
 
         return dict(
             se_params=se_params,

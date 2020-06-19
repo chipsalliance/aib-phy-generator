@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2019 Blue Cheetah Analog Design Inc.
+# Copyright 2020 Blue Cheetah Analog Design Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 dsn_class: aib_ams.design.phase_interp.PhaseInterpDesigner
 root_dir: gen_outputs/phase_interp
 impl_lib: AAA_DSN_PHASE_INTERP
@@ -20,9 +19,9 @@ precision: 8
 dsn_params:
   target:
     td_min: 1.0e-12
-    td_max: 15.0e-12
+    td_max: 20.0e-12
     td_sigma: 0.25e-12
-    t_max: 150.0e-12
+    t_max: 200.0e-12
 
   tristate_seg: 2
   nbits: 7

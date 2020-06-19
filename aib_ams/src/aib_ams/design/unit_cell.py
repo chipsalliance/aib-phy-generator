@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2019 Blue Cheetah Analog Design Inc.
+# Copyright 2020 Blue Cheetah Analog Design Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -488,6 +488,9 @@ class DriverPullUpDownDesigner(DesignerBase):
         ans: Mapping[str, Any]
             Design summary, including generator parameters and performance summary
         """
+        gen_specs: Optional[Mapping[str, Any]] = kwargs.get('gen_cell_specs', None)
+        gen_cell_args: Optional[Mapping[str, Any]] = kwargs.get('gen_cell_args', None)
+
         if em_options is None:
             em_options = {}
 
@@ -523,6 +526,17 @@ class DriverPullUpDownDesigner(DesignerBase):
         self.log(f'stack = {dut_params["stack"]}')
 
         if is_weak:
+            if gen_specs is not None and gen_cell_args is not None:
+                gen_cell_specs = dict(
+                    lay_class=STDCellWrapper.get_qualified_name(),
+                    params=dict(
+                        cls_name=PullUpDown.get_qualified_name(),
+                        params=dut_params,
+                    ),
+                    **gen_specs,
+                )
+                return dict(gen_specs=gen_cell_specs, gen_args=gen_cell_args)
+
             return dict(
                 stack=dut_params['stack'],
                 r_targ=r_targ,
@@ -537,6 +551,15 @@ class DriverPullUpDownDesigner(DesignerBase):
         # get widths/number of segments
         ans = await self._resize_transistors(dut_params, res_mm_specs, r_targ, r_pu, r_pd,
                                              seg_min, seg_even, rel_err, max_iter=6)
+
+        if gen_specs is not None and gen_cell_args is not None:
+            gen_cell_specs = dict(
+                lay_class=STDCellWrapper.get_qualified_name(),
+                cls_name=PullUpDown.get_qualified_name(),
+                params=dut_params,
+                **gen_specs,
+            )
+            return dict(gen_specs=gen_cell_specs, gen_args=gen_cell_args)
 
         return ans
 
@@ -649,6 +672,7 @@ class DriverPullUpDownDesigner(DesignerBase):
             tech_globals = get_tech_global_info('aib_ams')
             dut_params['seg_p'] = seg_p_best
             dut_params['seg_n'] = seg_n_best
+            # TODO: below code needs to be updated to reflect width selection
             if err_best_p > rel_err:
                 dut_params['w_p'] = dut_params['w_p'] - 1
             if err_best_n > rel_err:

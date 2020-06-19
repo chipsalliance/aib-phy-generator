@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2019 Blue Cheetah Analog Design Inc.
+# Copyright 2020 Blue Cheetah Analog Design Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -112,6 +112,10 @@ class OutputDriverDesigner(DesignerBase):
             Design summary, including generator parameters and performance summary
 
         """
+
+        gen_specs: Optional[Mapping[str, Any]] = kwargs.get('gen_cell_specs', None)
+        gen_cell_args: Optional[Mapping[str, Any]] = kwargs.get('gen_cell_args', None)
+
         tech_info = get_tech_global_info('aib_ams')
         w_p = tech_info['w_maxp']
         w_n = tech_info['w_maxn']
@@ -342,6 +346,15 @@ class OutputDriverDesigner(DesignerBase):
             self.logger.info(f'Worst delay was: {max(tdr_worst, tdf_worst)} in corner {worst_env}')
             self.logger.info(f'Worst duty cycle error was: {duty_err_worst} in corner {duty_env}')
             self.logger.info('')
+
+        if gen_specs is not None and gen_cell_args is not None:
+            gen_cell_specs = dict(
+                lay_class=STDCellWrapper.get_qualified_name(),
+                cls_name=AIBOutputDriver.get_qualified_name(),
+                params=dut_params,
+                **gen_specs,
+            )
+            return dict(gen_specs=gen_cell_specs, gen_args=gen_cell_args)
 
         return dict(dut_params=dut_params, tdr=tdr_worst, tdf=tdf_worst, trf_worst=trf_worst,
                     duty_err=duty_err_worst)

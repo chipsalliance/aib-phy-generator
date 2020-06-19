@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2019 Blue Cheetah Analog Design Inc.
+# Copyright 2020 Blue Cheetah Analog Design Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,6 +32,8 @@ from aib_ams.layout.top import FrontendESD
 from aib_ams.design.txanlg import TXAnalogCoreDesigner
 from aib_ams.design.rxanlg import RXAnalogDesigner
 
+from xbase.layout.mos.top import GenericWrapper
+from bag.layout.util import IPMarginTemplate
 
 class FrontendDesigner(DesignerBase):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -84,6 +86,9 @@ class FrontendDesigner(DesignerBase):
                            frontend_dsn_specs: Dict[str, Any] = None,
                            with_esd: bool = False,
                            **kwargs: Any) -> Mapping[str, Any]:
+
+        gen_specs: Optional[Mapping[str, Any]] = kwargs.get('gen_cell_specs', None)
+        gen_cell_args: Optional[Mapping[str, Any]] = kwargs.get('gen_cell_args', None)
         """Run sub-hierarchy design scripts and stitch together
         """
         # Get and set max widths of final drivers from tech defaults; set this in tile info
@@ -179,6 +184,19 @@ class FrontendDesigner(DesignerBase):
         print("Frontend: Running Signoff...")
         await self.verify_design(dut_params, tp_targ, tmismatch, c_ext, freq, trst, td_max,
                                  trf_max, c_odat, c_odat_async, c_oclkp, c_oclkn, trf_in, with_esd)
+        if gen_specs is not None and gen_cell_args is not None:
+            gen_cell_specs = dict(
+                lay_class=IPMarginTemplate.get_qualified_name(),
+                params=dict(
+                    cls_name=GenericWrapper.get_qualified_name(),
+                    params=dict(
+                        cls_name=Frontend.get_qualified_name(),
+                        params=dut_params,
+                    ),
+                ),
+                **gen_specs,
+            )
+            return dict(gen_specs=gen_cell_specs, gen_args=gen_cell_args)
 
         return dut_params
 
