@@ -25,10 +25,10 @@ setenv IPYTHONDIR ${BAG_WORK_DIR}/.ipython
 # disable hash-salting. We need stable hashing across sessions for caching purposes.
 setenv PYTHONHASHSEED 0
 
-setenv BAG_OA_PLUGIN_PATH ${BAG_TOOLS_ROOT}/oa_plugins
-
 # set program locations
 setenv BAG_PYTHON ${BAG_TOOLS_ROOT}/bin/python3
 
 # set location of BAG configuration file
 setenv BAG_CONFIG_PATH ${BAG_WORK_DIR}/bag_config.yaml
+
+setenv PYBAG_PYTHON ${BAG_PYTHON}
