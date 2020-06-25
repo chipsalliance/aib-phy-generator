@@ -1,0 +1,27 @@
+[submodule "xbase_bcad"]
+	path = xbase_bcad
+	url = git@github.com:bluecheetah/xbase.git
+[submodule "BAG_framework"]
+	path = BAG_framework
+	url = git@github.com:bluecheetah/bag.git
+[submodule "cds_ff_mpt"]
+	path = cds_ff_mpt
+	url = git@github.com:bluecheetah/cds_ff_mpt.git
+[submodule "aib_ams"]
+	path = aib_ams
+	url = git@github.com:bluecheetah/aib_ams.git
+[submodule "bag3_analog"]
+	path = bag3_analog
+	url = git@github.com:bluecheetah/bag3_analog.git
+[submodule "bag3_digital"]
+	path = bag3_digital
+	url = git@github.com:bluecheetah/bag3_digital.git
+[submodule "bag3_testbenches"]
+	path = bag3_testbenches
+	url = git@github.com:bluecheetah/bag3_testbenches.git
+[submodule "data/bag3_digital"]
+	path = data/bag3_digital
+	url = git@github.com:bluecheetah/bag3_digital_data_cds_ff_mpt.git
+[submodule "data/aib_ams"]
+	path = data/aib_ams
+	url = git@github.com:bluecheetah/aib_ams_data_cds_ff_mpt.git
