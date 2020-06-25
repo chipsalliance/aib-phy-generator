@@ -37,6 +37,9 @@ git submodule update --init --recursive
 If you ran the git commands in Windows, you can now transfer the
 aib-phy-generator folder to your linux machine to continue installation.
 
+If you need to switch submodules to use https instead of ssh, instead of running
+the recursive submodule update above, run the included ssh_to_https.sh script.
+
 3. Download the Cadence Generic Process Design Kit into your target directory.
 Use the web address shown in Table 1.  Cadence requires a login. Navigate to
 the page "Generic Process Design Kits (GPDK) Downloads.”  Select and download
