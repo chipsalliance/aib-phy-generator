@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2020 Blue Cheetah Analog Design Inc.
 #
@@ -13,6 +15,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+change_gitmodules() {
+	perl -i -p -e 's|git@(.*?):|https://\1/|g' .gitmodules
+}
 
-# Include the core cds lib file
-INCLUDE $BAG_WORK_DIR/cds.lib.core
+full_update() {
+
+	change_gitmodules
+
+	git submodule sync
+	git submodule update --init
+}
+
+full_update
+
+folder_list=("BAG_framework" "bag3_testbenches" "BAG_framework/pybag" "BAG_framework/pybag/cbag" "BAG_framework/pybag/pybind11_generics" "BAG_framework/pybag/pybind11_generics/pybind11")
+
+
+for folder in ${folder_list[*]};
+do
+echo $folder
+cd $folder; full_update; cd -
+done

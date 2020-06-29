@@ -23,9 +23,6 @@ export BAG_TEMP_DIR=${BAG_WORK_DIR}/BAGTMP
 export IPYTHONDIR=${BAG_WORK_DIR}/.ipython
 # disable hash-salting. We need stable hashing across sessions for caching purposes.
 export PYTHONHASHSEED=0
-
-export BAG_OA_PLUGIN_PATH=${BAG_TOOLS_ROOT}/oa_plugins
-
 # set program locations
 export BAG_PYTHON=${BAG_TOOLS_ROOT}/bin/python3
 

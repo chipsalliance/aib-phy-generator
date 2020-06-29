@@ -10,142 +10,123 @@ info@bcanalog.com
 *   Cadence tools:
     *   Virtuoso
     *   Pegasus/PVS (for running LVS)
+    *   Quantus/QRC (for running Extraction)
     *   SRR (for reading spectre data)
 *   A full list of dependencies and versions is in Appendix A below.
 
 *----------------------------------------
 # Installing the AIB Generator
 
-1. Clone the AIB Generator repository using a git command.  The following 
+1. Clone the AIB Generator repository using a git command.  The following
 commands use an example target directory of ~/aib.
-cd ~/aib 
-# Do a git init if you haven't already 
-git clone https://github.com/chipsalliance/aib-phy-generator aib-phy-generator  
+cd ~/aib
+# Do a git init if you haven't already
+git clone https://github.com/chipsalliance/aib-phy-generator aib-phy-generator
 
-If your Linux machines cannot access the internet, you can use a Windows 
-computer that is connected to the internet.  Download "git for windows" 
-(gitforwindows.org) and use the gitbash shell in that shell.  You will need 
-a means to have the Windows machine mount your target directory used by the 
+If your Linux machines cannot access the internet, you can use a Windows
+computer that is connected to the internet.  Download "git for windows"
+(gitforwindows.org) and use the gitbash shell in that shell.  You will need
+a means to have the Windows machine mount your target directory used by the
 Linux computer.
 
-2. Download the Cadence Generic Process Design Kit into your target directory.
-Use the web address shown in Table 1.  Cadence requires a login. Navigate to 
+2. Initialize git submodules:
+
+cd ~/aib/aib-phy-generator
+git submodule update --init --recursive
+
+If you ran the git commands in Windows, you can now transfer the
+aib-phy-generator folder to your linux machine to continue installation.
+
+If you need to switch submodules to use https instead of ssh, instead of running
+the recursive submodule update above, run the included ssh_to_https.sh script.
+
+3. Download the Cadence Generic Process Design Kit into your target directory.
+Use the web address shown in Table 1.  Cadence requires a login. Navigate to
 the page "Generic Process Design Kits (GPDK) Downloads.”  Select and download
 the file into your target ~/aib directory.
-    ADVGPDK (Version 0.5) - Advanced Node 0.8V / 1.8V Finfet / Multi Patterned 
+    ADVGPDK (Version 0.5) - Advanced Node 0.8V / 1.8V Finfet / Multi Patterned
     8 Metal Generic PDK: cds_ff_mpt_v_0.5 (1.2GB)**
 List the file
 cd ~/aib
-ls cds_ff_mpt_v_0.5.tar.gz  
-cds_ff_mpt_v_0.5.tar.gz  
+ls cds_ff_mpt_v_0.5.tar.gz
+cds_ff_mpt_v_0.5.tar.gz
 
-3. From the target directory, extract from gzip and tar.
-cd ~/aib  
-gunzip cds_ff_mpt_v_0.5.tar.gz  
-tar xvf cds_ff_mpt_v_0.5.tar  
-
-4. Download the remaining components from the Blue Cheetah repositories from 
-github.com into your target diretory.
-
-cd ~/aib/aib-phy-generator  
-git clone https://github.com/bluecheetah/xbase.git xbase_bcad  
-git clone https://github.com/bluecheetah/bag.git BAG_framework  
-git clone https://github.com/bluecheetah/cds_ff_mpt.git cds_ff_mpt  
+4. From the target directory, extract from gzip and tar.
+cd ~/aib
+gunzip cds_ff_mpt_v_0.5.tar.gz
+tar xvf cds_ff_mpt_v_0.5.tar
 
 5. Acquire the packages in Appendix A and install.
 Alternatively, you may contact Blue Cheetah Analog Design, Inc. for support at
-    info@bcanalog.com  
+    info@bcanalog.com
 and request the "bag3d" tar file for aib-phy-generator. Install the Blue Cheetah file
-bag3d0_rhel60_64_May29_2020.tar.gz 
+bag3d0_rhel60_64_May29_2020.tar.gz
 into your target directory, ~/aib in this example.
 Unzip the bag3d file:
 cd ~/aib
 gunzip bag3d0_rhel60_64_may29_2020.tar.gz
-Extract the bag3d files:
-cd ~/aib/aib-phy-generator  
+Extract the bag3d0 files:
+cd ~/aib/aib-phy-generator
 tar xvf ../bag3d0_rhel60_64_may29_2020.tar
 
-6. If you performed the "git clone" operations on a Windows system, you will 
-need to run these commands from Linux since Windows cannot create a symbolic 
-link.
-cd ~/aib/aib-phy-generator  
-mkdir -p BAG_framework/pybag/_build/lib  
-cd BAG_framework/pybag/_build/lib  
-ln -s ../../../../bag3d0_rhel60_64/pybag .  
-cd ~/aib/aib-phy-generator/cds_ff_mpt/workspace_setup  
-rm PDK  
-ln -s ../../../cds_ff_mpt_v_0.5 PDK  
+6. Edit `.bashrc` or `.cshrc` shell script so environment variables point to the
+correct directory for various CAD tools.  Variables to change are:
 
-7. Create these symbolic links
-cd ~/aib/aib-phy-generator  
-ln -s cds_ff_mpt/workspace_setup/bag_config.yaml bag_config.yaml  
-ln -s cds_ff_mpt/workspace_setup/cds.lib.core cds.lib.core  
-ln -s cds_ff_mpt/workspace_setup/display.drf display.drf  
-ln -s cds_ff_mpt/workspace_setup/leBindKeys.il leBindKeys.il  
-ln -s cds_ff_mpt/workspace_setup/models models  
-ln -s cds_ff_mpt/workspace_setup/pvtech.lib pvtech.lib  
-ln -s BAG_framework/run_scripts/start_bag_ICADV12d3.il start_bag.il  
-ln -s BAG_framework/run_scripts/virt_server.sh virt_server.il  
-ln -s cds_ff_mpt/workspace_setup/.cdsenv .cdsenv  
-ln -s cds_ff_mpt/workspace_setup/.cdsinit .cdsinit  
+CDS_INST_DIR: Virtuoso install directory.
+PEGASUS_HOME: Pegasus/PVS install directory.
+SPECTRE_HOME: Spectre install directory.
+QRC_HOME: Quantus/QRC install directory.
+OA_CDS_ROOT: OpenAccess directory packaged with Virtuoso.  Should be under $CDS_INST_DIR
+             (the version number may be different depending on your Virtuoso install).
 
+If you use a method other than setting "$CDS_LIC_FILE" for acquiring tool licenses,
+comment out the last line.
+
+7. update symbolic link to the PDK using the following commands:
+
+cd ~/aib/aib-phy-generator/cds_ff_mpt/workspace_setup
+rm PDK
+ln -s ../../../cds_ff_mpt_v_0.5 PDK
+
+8. Run the following setup script (source `.cshrc` instead in C-Shell):
+
+cd ~/aib/aib-phy-generator
+source .bashrc
+./setup_script.sh
 
 # Running the AIB Generator
 
-The run script for the AIB Generator requires modifications for the user’s 
-tool locations which are very likely to be different from user to user.
+1. List the generators.
 
-1. On your target system perform the necessary commands to obtain licenses 
-to the Cadence tools.  Edit .bashrc to set your local paths to the tools.
-In our case we modified the following:
+ls data/aib_ams/specs_dsn
+dcc_helper.yaml  output_driver.yaml  phase_interp.yaml      se_to_diff.yaml
+delay_line.yaml  output_pu_pd.yaml   rxanlg.yaml            txanlg.yaml
+frontend.yaml    phasedet.yaml       se_to_diff_match.yaml
 
-#export CDS_INST_DIR=/tools/cadence/ICADVM181
-export CDS_INST_DIR=/p/psg/eda/cadence/virtuoso/ICADVM18.1.20191025.ISR7/linux64
-#export PEGASUS_HOME=/tools/cadence/PEGASUS184
-export PEGASUS_HOME=/nfs/site/disks/psg_eda_1/cadence/pvs/16.11.000/linux64
-#export SRR_HOME=/tools/cadence/SRR
-#export SPECTRE_HOME=/tools/cadence/SPECTRE181
-export SPECTRE_HOME=/nfs/site/disks/psg_eda_1/cadence/spectre/18.10.235/linux64
-
-#export CDSLIB_HOME=/tools/bag3/programs/cdsLibPlugin
-#export CDSLIB_TOOL=${CDSLIB_HOME}/tools.lnx86
-#export PATH=${CDSLIB_TOOL}/bin:${PATH:-}
-
-#export LD_LIBRARY_PATH=${CDSLIB_TOOL}/lib/64bit:${LD_LIBRARY_PATH}
-export LD_LIBRARY_PATH=${CDS_INST_DIR}/tools/lib/64bit:${LD_LIBRARY_PATH:-}
-#export LD_LIBRARY_PATH=${SRR_HOME}/lib/64bit:${LD_LIBRARY_PATH}
-#export LD_LIBRARY_PATH=${BAG_TOOLS_ROOT}/lib64:${LD_LIBRARY_PATH}
-#export CDS_LIC_FILE=5280@login1.bcanalog.com
-
-2. List the generators.
-
-ls data/aib_ams/specs_dsn  
-dcc_helper.yaml  output_driver.yaml  phase_interp.yaml      se_to_diff.yaml  
-delay_line.yaml  output_pu_pd.yaml   rxanlg.yaml            txanlg.yaml  
-frontend.yaml    phasedet.yaml       se_to_diff_match.yaml  
-
-The above yaml files and associated generators produce A/MS instances 
-of their respective blocks. These instances are called within the pnr flow 
+The above yaml files and associated generators produce A/MS instances
+of their respective blocks. These instances are called within the pnr flow
 of the AIB PHY.
 
-3. Source `.bashrc`/`.cshrc` in your terminal.  
+3. Perform any necessary commands in terminal so that you can acquire licenses for CAD tools,
+   then source `.bashrc`/`.cshrc` in your terminal.
+
 source .bashrc
 
-4.  Run the following to start phase interpolator design script:  
- ./run_bag.sh BAG_framework/run_scripts/dsn_cell.py data/aib_ams/specs_dsn/phase_interp.yaml  
+4.  Run the following to start phase interpolator design script:
+ ./run_bag.sh BAG_framework/run_scripts/dsn_cell.py data/aib_ams/specs_dsn/phase_interp.yaml
     There are other yaml files in the 'specs_dsn' folder to run through different design scripts.
 
 5.  Generating other views:
     To generate a lef for a block, run the following command:
-./run_bag.sh BAG_framework/run_scripts/gen_cell.py data/aib_ams/specs_ip/txanlg.yaml -lef  
+./run_bag.sh BAG_framework/run_scripts/gen_cell.py data/aib_ams/specs_ip/txanlg.yaml -lef
 
     To generate a behavioral model for a block, run the following command:
-./run_bag.sh BAG_framework/run_scripts/gen_cell.py data/aib_ams/specs_ip/txanlg.yaml -mod  
-    
-    To generate a lib for a block, run the following command:
-./run_bag.sh bag3_digital/scripts_util/gen_lib.py data/aib_ams/specs_ip/txanlg_lib.yaml  
+./run_bag.sh BAG_framework/run_scripts/gen_cell.py data/aib_ams/specs_ip/txanlg.yaml -mod
 
-    
+    To generate a lib for a block, run the following command:
+./run_bag.sh bag3_digital/scripts_util/gen_lib.py data/aib_ams/specs_ip/txanlg_lib.yaml
+
+
 
 
 *----------------------------------------
@@ -203,4 +184,3 @@ virtualenv v.20.0.15
 wcwidth v.0.1.9
 zipp v.3.1.0
 zmq v.0.0.0
-    
