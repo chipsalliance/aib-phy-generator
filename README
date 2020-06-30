@@ -96,6 +96,14 @@ cd ~/aib/aib-phy-generator
 source .bashrc
 ./setup_script.sh
 
+9. If you use a different command for PVS/Pegasus, change the cag_config.yaml file:
+cd aib-phy-generator/cds_ff_mpt/workspace_setup
+# In the file bag_config.yaml, modify 
+    lvs_cmd: 'pegasus'
+To
+    lvs_cmd: 'pvs'
+
+#
 # Running the AIB Generator
 
 1. List the generators.
