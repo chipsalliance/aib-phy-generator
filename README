@@ -75,7 +75,7 @@ correct directory for various CAD tools.  Variables to change are:
 
 CDS_INST_DIR: Virtuoso install directory.
 PEGASUS_HOME: Pegasus/PVS install directory. If you have an alternate PVS license scheme, 
-   comment this out.
+   comment this line out.
 SPECTRE_HOME: Spectre install directory.
 QRC_HOME: Quantus/QRC install directory.
 OA_CDS_ROOT: OpenAccess directory packaged with Virtuoso.  Should be under $CDS_INST_DIR
@@ -96,7 +96,7 @@ cd ~/aib/aib-phy-generator
 source .bashrc
 ./setup_script.sh
 
-9. If you use a different command for PVS/Pegasus, change the cag_config.yaml file:
+9. If you use a different command for PVS/Pegasus, change the bag_config.yaml file:
 cd aib-phy-generator/cds_ff_mpt/workspace_setup
 # In the file bag_config.yaml, modify 
     lvs_cmd: 'pegasus'
