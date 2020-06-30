@@ -103,6 +103,16 @@ cd aib-phy-generator/cds_ff_mpt/workspace_setup
 To
     lvs_cmd: 'pvs'
 
+10. If you performed the "git clone" commands on a Windows, machine, the symbolic link
+in cds_ff_mpt will not be correct.  Perform the following commands from the 
+aib-phy-generator directory:
+
+cd cds_ff_mpt/pvs_setup
+rm pvs_rules
+ln -s ../workspace_setup/PDK/pvs/pvlLVS.rul pvs_rules
+cd ../..
+
+
 #
 # Running the AIB Generator
 
