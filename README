@@ -32,13 +32,14 @@ Linux computer.
 2. Initialize git submodules:
 
 cd ~/aib/aib-phy-generator
+If you need to switch submodules to use https instead of ssh, run the 
+included ssh_to_https.sh script:
+./ssh_to_https.sh
+Otherwise run the recursive submodule update:
 git submodule update --init --recursive
 
 If you ran the git commands in Windows, you can now transfer the
 aib-phy-generator folder to your linux machine to continue installation.
-
-If you need to switch submodules to use https instead of ssh, instead of running
-the recursive submodule update above, run the included ssh_to_https.sh script.
 
 3. Download the Cadence Generic Process Design Kit into your target directory.
 Use the web address shown in Table 1.  Cadence requires a login. Navigate to
@@ -73,7 +74,8 @@ tar xvf ../bag3d0_rhel60_64_may29_2020.tar
 correct directory for various CAD tools.  Variables to change are:
 
 CDS_INST_DIR: Virtuoso install directory.
-PEGASUS_HOME: Pegasus/PVS install directory.
+PEGASUS_HOME: Pegasus/PVS install directory. If you have an alternate PVS license scheme, 
+   comment this line out.
 SPECTRE_HOME: Spectre install directory.
 QRC_HOME: Quantus/QRC install directory.
 OA_CDS_ROOT: OpenAccess directory packaged with Virtuoso.  Should be under $CDS_INST_DIR
@@ -94,6 +96,24 @@ cd ~/aib/aib-phy-generator
 source .bashrc
 ./setup_script.sh
 
+9. If you use a different command for PVS/Pegasus, change the bag_config.yaml file:
+cd aib-phy-generator/cds_ff_mpt/workspace_setup
+# In the file bag_config.yaml, modify 
+    lvs_cmd: 'pegasus'
+To
+    lvs_cmd: 'pvs'
+
+10. If you performed the "git clone" commands on a Windows, machine, the symbolic link
+in cds_ff_mpt will not be correct.  Perform the following commands from the 
+aib-phy-generator directory:
+
+cd cds_ff_mpt/pvs_setup
+rm pvs_rules
+ln -s ../workspace_setup/PDK/pvs/pvlLVS.rul pvs_rules
+cd ../..
+
+
+#
 # Running the AIB Generator
 
 1. List the generators.
