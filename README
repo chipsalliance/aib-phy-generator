@@ -18,7 +18,8 @@ info@bcanalog.com
 # Installing the AIB Generator
 
 1. Clone the AIB Generator repository using a git command.  The following
-commands use an example target directory of ~/aib.
+commands use an example target directory of ~/aib. This must be done on a 
+computer that has access to the internet.
 cd ~/aib
 # Do a git init if you haven't already
 git clone https://github.com/chipsalliance/aib-phy-generator aib-phy-generator
@@ -29,8 +30,8 @@ computer that is connected to the internet.  Download "git for windows"
 a means to have the Windows machine mount your target directory used by the
 Linux computer.
 
-2. Initialize git submodules:
-
+2. Initialize git submodules.  This must be done on a computer that has
+access to the internet.
 cd ~/aib/aib-phy-generator
 If you need to switch submodules to use https instead of ssh, run the 
 included ssh_to_https.sh script:
