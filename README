@@ -116,38 +116,70 @@ cd ../..
 
 #
 # Running the AIB Generator
+1. The specs_dsn directory contains the design scripts that run through sizing procedures and 
+simulations for creating the blocks.
+- delay_line (dcc and dll)
+- phase_interp (dcc and dll)
+- phasedet (dcc and dll)
+- dcc_helper
+- frontend
+There is a slight difference in the frontend because of its hierarchy on top of rxanlg and 
+txanlg. There are separate rxanlg and txanlg design scripts mainly for debugging. The frontend 
+design script expects that rxanlg has already been designed mainly due to the execution time 
+of running through these scripts.
 
-1. List the generators.
-
-ls data/aib_ams/specs_dsn
-dcc_helper.yaml  output_driver.yaml  phase_interp.yaml      se_to_diff.yaml
-delay_line.yaml  output_pu_pd.yaml   rxanlg.yaml            txanlg.yaml
-frontend.yaml    phasedet.yaml       se_to_diff_match.yaml
-
-The above yaml files and associated generators produce A/MS instances
-of their respective blocks. These instances are called within the pnr flow
-of the AIB PHY.
-
-3. Perform any necessary commands in terminal so that you can acquire licenses for CAD tools,
-   then source `.bashrc`/`.cshrc` in your terminal.
-
+2. Perform any necessary commands in terminal so that you can acquire licenses for CAD tools, 
+then source `.bashrc`/`.cshrc` in your terminal.
 source .bashrc
 
-4.  Run the following to start phase interpolator design script:
- ./run_bag.sh BAG_framework/run_scripts/dsn_cell.py data/aib_ams/specs_dsn/phase_interp.yaml
-    There are other yaml files in the 'specs_dsn' folder to run through different design scripts.
+3. Run the design script for designing the DLL Phase Interpolator:
+./run_bag.sh BAG_framework/run_scripts/dsn_cell.py data/aib_ams/specs_dsn/dll_phase_interp.yaml
+You may replace "dll_phase_interp.yaml" with the following from data/aib_ams/specs_dsn:
+dcc_delay_line.yaml
+dcc_helper.yaml
+dcc_phase_interp.yaml
+dcc_phasedet.yaml
+dll_delay_line.yaml
+dll_phase_interp.yaml
+dll_phasedet.yaml
+frontend.yaml
+rxanlg.yaml
+txanlg.yaml
 
-5.  Generating other views:
-    To generate a lef for a block, run the following command:
-./run_bag.sh BAG_framework/run_scripts/gen_cell.py data/aib_ams/specs_ip/txanlg.yaml -lef
+The outputs of the design phase are in directories under gen_outputs.
 
-    To generate a behavioral model for a block, run the following command:
-./run_bag.sh BAG_framework/run_scripts/gen_cell.py data/aib_ams/specs_ip/txanlg.yaml -mod
+4. Run the IP generation script to produce gds, lef, cdl and Verilog models.
+./run_bag.sh BAG_framework/run_scripts/gen_cell.py data/aib_ams/specs_ip/dll_phase_interp.yaml -raw -mod -lef
+You may replace "dll_phase_interp.yaml" with the following from data/aib_ams/specs_ip:
+dcc_delay_line.yaml
+dcc_helper.yaml
+dcc_phase_det.yaml
+dcc_phase_interp.yaml
+dll_delay_line.yaml
+dll_phase_interp.yaml
+dll_phasedet.yaml
+frontend.yaml
+rxanlg.yaml
+txanlg.yaml
 
-    To generate a lib for a block, run the following command:
-./run_bag.sh bag3_digital/scripts_util/gen_lib.py data/aib_ams/specs_ip/txanlg_lib.yaml
+The outputs of the IP generation are in directories under gen_outputs/ip_blocks.
 
+5. Run the timing script to produce lib files.
+./run_bag.sh bag3_digital/scripts_util/gen_lib.py data/aib_ams/specs_ip/dll_phase_interp_lib.yaml
+You may replace "dll_phase_interp_lib.yaml" with the following from 
+data/aib_ams/specs_ip:
+dcc_delay_line_lib.yaml
+dcc_helper_lib.yaml
+dcc_phase_det_lib.yaml
+dcc_phase_interp_lib.yaml
+dll_delay_line_lib.yaml
+dll_phase_interp_lib.yaml
+dll_phasedet_lib.yaml
+frontend_lib.yaml
+rxanlg_lib.yaml
+txanlg_lib.yaml
 
+The output .lib files are in directories under gen_outputs/ip_blocks.
 
 
 *----------------------------------------
