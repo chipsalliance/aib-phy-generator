@@ -180,7 +180,9 @@ then source `.bashrc`/`.cshrc` in your terminal.
 source .bashrc
 
 3. Run the design script for designing the DLL Phase Interpolator:
+
 ./run_bag.sh BAG_framework/run_scripts/dsn_cell.py data/aib_ams/specs_dsn/dll_phase_interp.yaml
+
 You may edit dll_phase_interp.yaml to produce a delay vs. step graph:
 
 
