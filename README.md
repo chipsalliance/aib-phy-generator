@@ -20,8 +20,11 @@ info@bcanalog.com
 1. Clone the AIB Generator repository using a git command.  The following
 commands use an example target directory of ~/aib. This must be done on a 
 computer that has access to the internet.
+
 cd ~/aib
-# Do a git init if you haven't already
+
+Do a git init if you haven't already
+
 git clone https://github.com/chipsalliance/aib-phy-generator aib-phy-generator
 
 If your Linux machines cannot access the internet, you can use a Windows
@@ -32,11 +35,16 @@ Linux computer.
 
 2. Initialize git submodules.  This must be done on a computer that has
 access to the internet.
+
 cd ~/aib/aib-phy-generator
+
 If you need to switch submodules to use https instead of ssh, run the 
 included ssh_to_https.sh script:
+
 ./ssh_to_https.sh
+
 Otherwise run the recursive submodule update:
+
 git submodule update --init --recursive
 
 If you ran the git commands in Windows, you can now transfer the
@@ -46,39 +54,62 @@ aib-phy-generator folder to your linux machine to continue installation.
 Use the web address shown in Table 1.  Cadence requires a login. Navigate to
 the page "Generic Process Design Kits (GPDK) Downloads.”  Select and download
 the file into your target ~/aib directory.
+
     ADVGPDK (Version 0.5) - Advanced Node 0.8V / 1.8V Finfet / Multi Patterned
+
     8 Metal Generic PDK: cds_ff_mpt_v_0.5 (1.2GB)**
+
 List the file
+
 cd ~/aib
+
 ls cds_ff_mpt_v_0.5.tar.gz
+
 cds_ff_mpt_v_0.5.tar.gz
 
 4. From the target directory, extract from gzip and tar.
+
 cd ~/aib
+
 gunzip cds_ff_mpt_v_0.5.tar.gz
+
 tar xvf cds_ff_mpt_v_0.5.tar
 
 5. Acquire the packages in Appendix A and install.
 Alternatively, you may contact Blue Cheetah Analog Design, Inc. for support at
+
     info@bcanalog.com
+
 and request the "bag3d" tar file for aib-phy-generator. Install the Blue Cheetah file
+
 bag3d0_rhel60_64_May29_2020.tar.gz
+
 into your target directory, ~/aib in this example.
+
 Unzip the bag3d file:
+
 cd ~/aib
+
 gunzip bag3d0_rhel60_64_may29_2020.tar.gz
+
 Extract the bag3d0 files:
+
 cd ~/aib/aib-phy-generator
+
 tar xvf ../bag3d0_rhel60_64_may29_2020.tar
 
 6. Edit `.bashrc` or `.cshrc` shell script so environment variables point to the
 correct directory for various CAD tools.  Variables to change are:
 
 CDS_INST_DIR: Virtuoso install directory.
+
 PEGASUS_HOME: Pegasus/PVS install directory. If you have an alternate PVS license scheme, 
    comment this line out.
+
 SPECTRE_HOME: Spectre install directory.
+
 QRC_HOME: Quantus/QRC install directory.
+
 OA_CDS_ROOT: OpenAccess directory packaged with Virtuoso.  Should be under $CDS_INST_DIR
              (the version number may be different depending on your Virtuoso install).
 
@@ -88,24 +119,31 @@ comment out the last line.
 7. update symbolic link to the PDK using the following commands:
 
 cd ~/aib/aib-phy-generator/cds_ff_mpt/workspace_setup
+
 rm PDK
+
 ln -s ../../../cds_ff_mpt_v_0.5 PDK
 
 8. Run the following setup script (source `.cshrc` instead in C-Shell):
 
 cd ~/aib/aib-phy-generator
+
 source .bashrc
+
 ./setup_script.sh
 
-9. If you use a different command for PVS/Pegasus, change the bag_config.yaml file:
-cd aib-phy-generator/cds_ff_mpt/workspace_setup
 
-#
+9. If you use a different command for PVS/Pegasus, change the bag_config.yaml file:
+
+cd aib-phy-generator/cds_ff_mpt/workspace_setup
 
 
 In the file bag_config.yaml, modify 
+
     lvs_cmd: 'pegasus'
+
 To
+
     lvs_cmd: 'pvs'
 
 10. If you performed the "git clone" commands on a Windows, machine, the symbolic link
@@ -113,8 +151,11 @@ in cds_ff_mpt will not be correct.  Perform the following commands from the
 aib-phy-generator directory:
 
 cd cds_ff_mpt/pvs_setup
+
 rm pvs_rules
+
 ln -s ../workspace_setup/PDK/pvs/pvlLVS.rul pvs_rules
+
 cd ../..
 
 
@@ -135,11 +176,14 @@ of running through these scripts.
 
 2. Perform any necessary commands in terminal so that you can acquire licenses for CAD tools, 
 then source `.bashrc`/`.cshrc` in your terminal.
+
 source .bashrc
 
 3. Run the design script for designing the DLL Phase Interpolator:
 ./run_bag.sh BAG_framework/run_scripts/dsn_cell.py data/aib_ams/specs_dsn/dll_phase_interp.yaml
 You may edit dll_phase_interp.yaml to produce a delay vs. step graph:
+
+
 Change
 
   plot_result: False
