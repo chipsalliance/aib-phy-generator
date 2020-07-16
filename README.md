@@ -210,7 +210,9 @@ You may replace "dll_phase_interp.yaml" with the following from data/aib_ams/spe
 The outputs of the design phase are in directories under gen_outputs.
 
 4. Run the IP generation script to produce gds, lef, cdl and Verilog models.
+
 ./run_bag.sh BAG_framework/run_scripts/gen_cell.py data/aib_ams/specs_ip/dll_phase_interp.yaml -raw -mod -lef
+
 You may replace "dll_phase_interp.yaml" with the following from data/aib_ams/specs_ip:
 - dcc_delay_line.yaml
 - dcc_helper.yaml
@@ -226,7 +228,9 @@ You may replace "dll_phase_interp.yaml" with the following from data/aib_ams/spe
 The outputs of the IP generation are in directories under gen_outputs/ip_blocks.
 
 5. Run the timing script to produce lib files.
+
 ./run_bag.sh bag3_digital/scripts_util/gen_lib.py data/aib_ams/specs_ip/dll_phase_interp_lib.yaml
+
 You may replace "dll_phase_interp_lib.yaml" with the following from 
 data/aib_ams/specs_ip:
 - dcc_delay_line_lib.yaml
