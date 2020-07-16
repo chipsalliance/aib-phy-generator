@@ -188,7 +188,7 @@ txanlg_lib.yaml
 The output .lib files are in directories under gen_outputs/ip_blocks.
 
 
-A full block by block overview can be seen in INSTRUCTIONS.md
+A full block by block overview can be seen here (INSTRUCTIONS.md)
 
 
 *----------------------------------------

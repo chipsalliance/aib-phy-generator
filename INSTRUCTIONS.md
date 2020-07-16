@@ -1,4 +1,8 @@
-AIB blocks
+Instructions for Generating AIB blocks
+
+
+Developed by Blue Cheetah Analog Design, Inc.
+info@bcanalog.com
 
 For each block, there will be a gds (.gds), lef (.lef), lib (.lib),
 netlist (.net or .cdl), model (.v or .sv) and a shell (.v). There will
