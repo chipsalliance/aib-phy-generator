@@ -99,7 +99,11 @@ source .bashrc
 
 9. If you use a different command for PVS/Pegasus, change the bag_config.yaml file:
 cd aib-phy-generator/cds_ff_mpt/workspace_setup
-# In the file bag_config.yaml, modify 
+
+#
+
+
+In the file bag_config.yaml, modify 
     lvs_cmd: 'pegasus'
 To
     lvs_cmd: 'pvs'
@@ -123,6 +127,7 @@ simulations for creating the blocks.
 - phasedet (dcc and dll)
 - dcc_helper
 - frontend
+
 There is a slight difference in the frontend because of its hierarchy on top of rxanlg and 
 txanlg. There are separate rxanlg and txanlg design scripts mainly for debugging. The frontend 
 design script expects that rxanlg has already been designed mainly due to the execution time 
@@ -136,37 +141,41 @@ source .bashrc
 ./run_bag.sh BAG_framework/run_scripts/dsn_cell.py data/aib_ams/specs_dsn/dll_phase_interp.yaml
 You may edit dll_phase_interp.yaml to produce a delay vs. step graph:
 Change
+
   plot_result: False
+
 To
+
   plot_result: True
 
+
 You may replace "dll_phase_interp.yaml" with the following from data/aib_ams/specs_dsn:
-dcc_delay_line.yaml
-dcc_helper.yaml
-dcc_phase_interp.yaml
-dcc_phasedet.yaml
-dll_delay_line.yaml
-dll_phase_interp.yaml
-dll_phasedet.yaml
-frontend.yaml
-rxanlg.yaml
-txanlg.yaml
+- dcc_delay_line.yaml
+- dcc_helper.yaml
+- dcc_phase_interp.yaml
+- dcc_phasedet.yaml
+- dll_delay_line.yaml
+- dll_phase_interp.yaml
+- dll_phasedet.yaml
+- frontend.yaml
+- rxanlg.yaml
+- txanlg.yaml
 
 The outputs of the design phase are in directories under gen_outputs.
 
 4. Run the IP generation script to produce gds, lef, cdl and Verilog models.
 ./run_bag.sh BAG_framework/run_scripts/gen_cell.py data/aib_ams/specs_ip/dll_phase_interp.yaml -raw -mod -lef
 You may replace "dll_phase_interp.yaml" with the following from data/aib_ams/specs_ip:
-dcc_delay_line.yaml
-dcc_helper.yaml
-dcc_phase_det.yaml
-dcc_phase_interp.yaml
-dll_delay_line.yaml
-dll_phase_interp.yaml
-dll_phasedet.yaml
-frontend.yaml
-rxanlg.yaml
-txanlg.yaml
+- dcc_delay_line.yaml
+- dcc_helper.yaml
+- dcc_phase_det.yaml
+- dcc_phase_interp.yaml
+- dll_delay_line.yaml
+- dll_phase_interp.yaml
+- dll_phasedet.yaml
+- frontend.yaml
+- rxanlg.yaml
+- txanlg.yaml
 
 The outputs of the IP generation are in directories under gen_outputs/ip_blocks.
 
@@ -174,16 +183,16 @@ The outputs of the IP generation are in directories under gen_outputs/ip_blocks.
 ./run_bag.sh bag3_digital/scripts_util/gen_lib.py data/aib_ams/specs_ip/dll_phase_interp_lib.yaml
 You may replace "dll_phase_interp_lib.yaml" with the following from 
 data/aib_ams/specs_ip:
-dcc_delay_line_lib.yaml
-dcc_helper_lib.yaml
-dcc_phase_det_lib.yaml
-dcc_phase_interp_lib.yaml
-dll_delay_line_lib.yaml
-dll_phase_interp_lib.yaml
-dll_phasedet_lib.yaml
-frontend_lib.yaml
-rxanlg_lib.yaml
-txanlg_lib.yaml
+- dcc_delay_line_lib.yaml
+- dcc_helper_lib.yaml
+- dcc_phase_det_lib.yaml
+- dcc_phase_interp_lib.yaml
+- dll_delay_line_lib.yaml
+- dll_phase_interp_lib.yaml
+- dll_phasedet_lib.yaml
+- frontend_lib.yaml
+- rxanlg_lib.yaml
+- txanlg_lib.yaml
 
 The output .lib files are in directories under gen_outputs/ip_blocks.
 
@@ -197,52 +206,52 @@ A full block by block overview can be seen [here](INSTRUCTIONS.md)
 Python 3.7
 
 Python packages:
-apipkg v.1.5
-appdirs v.1.4.3
-attrs v.19.3.0
-backcall v.0.1.0
-cycler v.0.10.0
-decorator v.4.4.2
-distlib v.0.3.0
-execnet v.1.7.1
-filelock v.3.0.12
-h5py v.2.10.0
-importlib-metadata v.1.6.0
-ipython v.7.13.0
-ipython-genutils v.0.2.0
-jedi v.0.16.0
-Jinja2 v.2.11.1
-kiwisolver v.1.2.0
-MarkupSafe v.1.1.1
-matplotlib v.3.2.1
-more-itertools v.8.2.0
-networkx v.2.4
-numpy v.1.18.2
-packaging v.20.3
-pandocfilters v.1.4.2
-parso v.0.6.2
-pexpect v.4.8.0
-pickleshare v.0.7.5
-pluggy v.0.13.1
-prompt-toolkit v.3.0.5
-ptyprocess v.0.6.0
-py v.1.8.1
-Pygments v.2.6.1
-pyparsing v.2.4.6
-PyQt5 v.5.14.0
-PyQt5-sip v.12.7.1
-pytest v.5.4.1
-pytest-forked v.1.1.3
-pytest-xdist v.1.31.0
-python-dateutil v.2.8.1
-pyzmq v.19.0.0
-ruamel.yaml v.0.16.10
-ruamel.yaml.clib v.0.2.0
-scipy v.1.4.1
-six v.1.14.0
-sortedcontainers v.2.1.0
-traitlets v.4.3.3
-virtualenv v.20.0.15
-wcwidth v.0.1.9
-zipp v.3.1.0
-zmq v.0.0.0
+- apipkg v.1.5
+- appdirs v.1.4.3
+- attrs v.19.3.0
+- backcall v.0.1.0
+- cycler v.0.10.0
+- decorator v.4.4.2
+- distlib v.0.3.0
+- execnet v.1.7.1
+- filelock v.3.0.12
+- h5py v.2.10.0
+- importlib-metadata v.1.6.0
+- ipython v.7.13.0
+- ipython-genutils v.0.2.0
+- jedi v.0.16.0
+- Jinja2 v.2.11.1
+- kiwisolver v.1.2.0
+- MarkupSafe v.1.1.1
+- matplotlib v.3.2.1
+- more-itertools v.8.2.0
+- networkx v.2.4
+- numpy v.1.18.2
+- packaging v.20.3
+- pandocfilters v.1.4.2
+- parso v.0.6.2
+- pexpect v.4.8.0
+- pickleshare v.0.7.5
+- pluggy v.0.13.1
+- prompt-toolkit v.3.0.5
+- ptyprocess v.0.6.0
+- py v.1.8.1
+- Pygments v.2.6.1
+- pyparsing v.2.4.6
+- PyQt5 v.5.14.0
+- PyQt5-sip v.12.7.1
+- pytest v.5.4.1
+- pytest-forked v.1.1.3
+- pytest-xdist v.1.31.0
+- python-dateutil v.2.8.1
+- pyzmq v.19.0.0
+- ruamel.yaml v.0.16.10
+- ruamel.yaml.clib v.0.2.0
+- scipy v.1.4.1
+- six v.1.14.0
+- sortedcontainers v.2.1.0
+- traitlets v.4.3.3
+- virtualenv v.20.0.15
+- wcwidth v.0.1.9
+- zipp v.3.1.0
+- zmq v.0.0.0
