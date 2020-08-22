@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 DEFINE BAG_prim $BAG_TECH_CONFIG_DIR/OA/BAG_prim
-DEFINE bag_test $BAG_WORK_DIR/BAG_framework/OA/bag_test
 DEFINE aib_ams $BAG_WORK_DIR/aib_ams/OA/aib_ams
 DEFINE bag3_analog $BAG_WORK_DIR/bag3_analog/OA/bag3_analog
 DEFINE bag3_digital $BAG_WORK_DIR/bag3_digital/OA/bag3_digital
